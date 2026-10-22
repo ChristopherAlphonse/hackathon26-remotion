@@ -1,0 +1,25 @@
+node_modules
+dist
+.DS_Store
+.env
+
+out
+# Local secrets written by `elevenlabs onboard`
+/.env.local
+
+# Sensitive files
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+*.pfx
+*.crt
+id_rsa*
+id_ed25519*
+credentials*.json
+service-account*.json
+secrets.json
+.aws/
+.npmrc
+.netrc
