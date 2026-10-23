@@ -8,7 +8,7 @@ A narrated, animated explainer built with [Remotion](https://www.remotion.dev/).
 
 - 1920x1080 at 24 fps, about 4 minutes 25 seconds (264.5 s): a 7 s "Runway Rebels presents" intro, 17 narrated scenes (246 s), then about 11.5 s of credits.
 - One composition, `TwoClocks` (`src/Root.tsx`).
-- Narration is generated with ElevenLabs (voice: Matilda). The music bed and intro sound effect are in the repo, so you only need an ElevenLabs key if you change the narration.
+- Narration is generated with ElevenLabs (voice: a cloned voice, "christopher alphonse", using the eleven_v4 model). The music bed and intro sound effect are in the repo, so you only need an ElevenLabs key if you change the narration.
 
 ## Setup
 

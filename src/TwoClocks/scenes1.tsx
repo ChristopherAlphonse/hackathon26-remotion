@@ -231,45 +231,77 @@ export const S3: React.FC = () => {
 };
 
 // ---------- 4 · The question ----------
+// Staged so only a couple of things are on screen at once: ramp -> system -> (ramp leaves) -> gate + controller.
 export const S4: React.FC = () => {
   const t = useT();
   const hearAt = when(3, "Could the system");
-  const p = prog(t, hearAt, 2.4);
-  const lean = prog(t, hearAt + 1.2, 1.2);
-  const handUp = prog(t, when(3, "how do you"), 1.2);
-  const ribbon = "M520 440 C760 330 880 590 1120 450 C1180 420 1230 430 1290 450";
+  const ifAt = when(3, "And if it could");
+  const letAt = when(3, "how do you");
+  const gateAt = when(3, "without letting");
+  const rampOut = 1 - prog(t, ifAt, 0.7);
+  const rampIn = prog(t, 0.3, 0.8) * rampOut;
+  const sysIn = prog(t, hearAt, 0.8);
+  const recIn = prog(t, letAt, 0.8);
+  const shift = -120 * prog(t, ifAt, 0.9);
+  const listening = t >= 0.9;
+  const lt = Math.max(0, t - 0.9);
+  const talk = listening && rampOut > 0.5 ? 0.5 + 0.5 * Math.sin(t * 11) : 0;
+  // sound waves leave the ramp worker's mouth and travel to the system
+  const mouth = { x: 470, y: 548 };
+  const waves = [0, 1, 2].map((i) => {
+    const ph = (lt * 0.7 + i / 3) % 1;
+    const r = 30 + ph * 300;
+    const pt = (s: number) => `${mouth.x + Math.cos(s * 0.6) * r} ${mouth.y + Math.sin(s * 0.6) * r}`;
+    return { d: `M${pt(-1)} A${r} ${r} 0 0 1 ${pt(1)}`, o: listening ? Math.min(1, ph * 6) * (1 - ph) : 0 };
+  });
+  // the system's reply: a gold pulse that heads for the record but is stopped at the gate
+  const startX = 1135 + shift;
+  const pulseX = mix(startX, 1205, lin(t, letAt + 0.5, 1.5));
+  const pulseR = 16 * (1 - prog(t, gateAt + 0.7, 0.5));
+  const closed = prog(t, gateAt, 0.7);
+  const armDeg = mix(-82, 0, closed);
   return (
     <Art>
-      <g opacity={prog(t, 0.3, 0.8)}>
-        <Clock cx={360} cy={450} r={170} rim={C.teal} {...handsFor(16, 12)} />
+      <g transform="translate(0 70)">
+        {/* the ramp: someone talking on the radio, and what they know */}
+        <g opacity={rampIn}>
+          <Bust x={330} y={540} s={1.6} skin={C.skinB} shirt={C.blue} kind="ramp" look={1} talk={talk} />
+          {waves.map((w, i) => (
+            <path key={i} d={w.d} fill="none" stroke={C.teal} strokeWidth={14} strokeLinecap="round" opacity={w.o} />
+          ))}
+        </g>
+        {/* the system: a screen that listens */}
+        <g opacity={sysIn} transform={`translate(${shift} 0)`}>
+          <rect x={780} y={440} width={340} height={230} rx={20} fill={C.panel} stroke={C.cream} strokeWidth={9} />
+          <rect x={930} y={670} width={40} height={40} fill={C.cream} stroke={C.ink} strokeWidth={5} />
+          <rect x={880} y={706} width={140} height={22} rx={8} fill={C.cream} stroke={C.ink} strokeWidth={5} />
+          {Array.from({ length: 9 }).map((_, i) => {
+            const h = t >= hearAt ? 18 + 70 * Math.abs(Math.sin(t * 6 + i * 1.7)) * Math.abs(Math.sin(i * 0.9 + 1)) + 10 : 10;
+            return <rect key={i} x={812 + i * 30} y={600 - h} width={18} height={h} rx={6} fill={C.teal} />;
+          })}
+        </g>
+        {/* the person who decides, on the far side of the gate */}
+        <g opacity={recIn}>
+          <Bust x={1610} y={540} s={1.6} skin={C.skinA} shirt={C.blueDark} kind="controller" look={-1} />
+        </g>
+        {/* the gate between the system and the record */}
+        <g opacity={recIn}>
+          <g transform={`translate(1248 712) rotate(${armDeg})`}>
+            <rect x={-14} y={-200} width={28} height={200} rx={8} fill={C.cream} stroke={C.ink} strokeWidth={5} />
+            {[30, 85, 140].map((y) => (
+              <rect key={y} x={-14} y={-y - 30} width={28} height={30} fill={C.red} />
+            ))}
+          </g>
+          <circle cx={1248} cy={712} r={20} fill={C.gold} stroke={C.ink} strokeWidth={5} />
+        </g>
+        {/* the pulse the system wants to send, held back at the gate */}
+        {t > letAt + 0.5 && pulseR > 0.5 ? <circle cx={pulseX} cy={548} r={pulseR} fill={C.gold} stroke={C.ink} strokeWidth={5} /> : null}
       </g>
-      {/* the second clock has become an ear */}
-      <g transform={`translate(${mix(0, 22, lean)} 0)`} opacity={prog(t, 0.5, 0.9)}>
-        <path
-          d="M1300 360 C1300 250 1460 230 1490 350 C1515 440 1440 500 1420 560 C1404 612 1345 640 1312 596"
-          fill={C.cream}
-          stroke={C.ink}
-          strokeWidth={9}
-          strokeLinejoin="round"
-        />
-        <path d="M1352 380 C1362 338 1426 346 1432 396 C1436 438 1388 466 1378 520" fill="none" stroke={C.ink} strokeWidth={8} strokeLinecap="round" />
-        <circle cx={1470} cy={560} r={0} />
-      </g>
-      <Ribbon d={ribbon} p={p} len={1} />
-      {/* the dial: a needle that swings toward "decide" but is held back */}
-      <g opacity={prog(t, when(3, "how do you"), 0.8)}>
-        <circle cx={960} cy={830} r={130} fill={C.panel} stroke={C.cream} strokeWidth={9} />
-        {Array.from({ length: 11 }).map((_, i) => (
-          <line key={i} x1={0} y1={-112} x2={0} y2={-92} stroke={C.cream} strokeWidth={7} strokeLinecap="round" transform={`translate(960 830) rotate(${-120 + i * 24})`} />
-        ))}
-        <line x1={960} y1={830} x2={960} y2={745} stroke={C.gold} strokeWidth={12} strokeLinecap="round" transform={`rotate(${mix(-100, -20, handUp)} 960 830)`} />
-        <circle cx={960} cy={830} r={14} fill={C.gold} stroke={C.ink} strokeWidth={5} />
-      </g>
-      {/* hand-lettered question */}
-      <Hand x={960} y={180} size={96} fill={C.cream} opacity={prog(t, hearAt, 0.7)}>
+      {/* one hand-lettered line at a time */}
+      <Hand x={960} y={180} size={96} fill={C.cream} opacity={prog(t, hearAt, 0.7) * (1 - prog(t, gateAt - 0.3, 0.5))}>
         Could the system hear it?
       </Hand>
-      <Hand x={960} y={300} size={80} fill={C.gold} opacity={prog(t, when(3, "without letting"), 0.7)}>
+      <Hand x={960} y={180} size={84} fill={C.gold} opacity={prog(t, gateAt + 0.1, 0.7)}>
         ...without it taking over?
       </Hand>
     </Art>
