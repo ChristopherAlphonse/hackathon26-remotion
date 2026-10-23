@@ -63,6 +63,11 @@ export const S11: React.FC = () => {
   const yAt = (v: number) => barBot - (barBot - barTop) * v;
   const cardY = mix(yAt(0.1), yAt(0.92), rise);
   const rule = prog(t, when(8, "Seventy-five"), 0.8);
+  // the second lock (a critical decision) comes in as "the second lock" is said, and rattles shut on "stays shut"
+  const secondAt = when(8, "the second lock");
+  const shutAt = when(8, "stays shut");
+  const second = prog(t, secondAt - 0.5, 0.7);
+  const rattle = Math.sin(t * 46) * 7 * seg(t, shutAt - 0.1, shutAt + 0.1) * (1 - seg(t, shutAt + 0.7, shutAt + 1.0));
   return (
     <Art
       overlay={
@@ -79,6 +84,12 @@ export const S11: React.FC = () => {
           <Label x={1080} y={474} size={26} fill={C.cream}>
             CONFIDENCE
           </Label>
+          <Label x={1080} y={786} size={21} fill={C.cream} opacity={second}>
+            FLIGHT DELAY · CREW CHANGE
+          </Label>
+          <Label x={1080} y={830} size={28} fill={C.gold} weight={900} opacity={prog(t, shutAt - 0.1, 0.5)}>
+            STAYS SHUT
+          </Label>
         </>
       }
     >
@@ -89,82 +100,117 @@ export const S11: React.FC = () => {
       <g transform={`translate(520 ${cardY})`}>
         <rect x={-130} y={-48} width={260} height={96} rx={12} fill={C.cream} stroke={C.gold} strokeWidth={9} />
       </g>
-      {/* the lock: confidence clears the bar */}
-      <rect x={880} y={150} width={400} height={440} rx={22} fill={C.panel} stroke={C.ink} strokeWidth={9} />
+      {/* the locks: confidence clears the bar, but a critical decision is a second lock */}
+      <rect x={880} y={150} width={400} height={720} rx={22} fill={C.panel} stroke={C.ink} strokeWidth={9} />
       <Lock x={1080} y={330} open={open} s={0.8} />
+      <g opacity={second}>
+        <Lock x={1080} y={640} open={0} shake={rattle} s={0.8} />
+      </g>
     </Art>
   );
 };
 
-// ---------- 12 · Human in the loop ----------
+// ---------- 12 · Human in the loop: the voice is a witness, a person takes the bench ----------
 export const S12: React.FC = () => {
   const t = useT();
   const title = prog(t, when(9, "human in the loop") - 0.3, 0.8);
   const lowAt = when(9, "too low");
   const critAt = when(9, "critical");
-  const stopAt = when(9, "The system stops");
+  const witAt = when(9, "The voice");
+  const testAt = when(9, "it testifies");
+  const ruleAt = when(9, "it doesn't rule");
+  const benchAt = when(9, "takes the bench");
   const low = prog(t, lowAt - 0.4, 0.7);
   const crit = prog(t, critAt - 0.4, 0.7);
-  const stop = prog(t, stopAt, 0.7);
-  const who = prog(t, lowAt + 0.4, 0.8);
-  const arrowLow = prog(t, lowAt + 0.6, 1.0);
-  const arrowCrit = prog(t, critAt + 0.6, 1.0);
+  // the two triggers give way to the courtroom
+  const out = seg(t, witAt - 0.3, witAt + 0.3);
+  const court = prog(t, witAt - 0.1, 0.8);
+  const testify = prog(t, testAt, 1.4);
+  const sit = prog(t, benchAt, 0.9);
+  const wave = Math.sin(t * 6) * (1 - sit);
   const bx = (v: number) => 270 + 420 * v;
+  const WX = 440; // the witness stand
+  const JX = 1280; // the judge's bench
   return (
     <Art
       overlay={
         <>
-          <Label x={480} y={362} size={30} fill={C.ink} weight={900} opacity={low}>
+          <Label x={480} y={362} size={30} fill={C.ink} weight={900} opacity={low * (1 - out)}>
             CONFIDENCE TOO LOW
           </Label>
-          <Label x={bx(0.75)} y={590} size={24} fill={C.ink} opacity={low}>
+          <Label x={bx(0.75)} y={590} size={24} fill={C.ink} opacity={low * (1 - out)}>
             0.75
           </Label>
-          <Label x={bx(0.55)} y={478} size={26} fill={C.red} weight={900} opacity={low}>
+          <Label x={bx(0.55)} y={478} size={26} fill={C.red} weight={900} opacity={low * (1 - out)}>
             0.55
           </Label>
-          <Label x={1440} y={362} size={30} fill={C.ink} weight={900} opacity={crit}>
+          <Label x={1440} y={362} size={30} fill={C.ink} weight={900} opacity={crit * (1 - out)}>
             CRITICAL DECISION
           </Label>
-          <Label x={1320} y={608} size={22} fill={C.ink} opacity={crit}>
+          <Label x={1320} y={608} size={22} fill={C.ink} opacity={crit * (1 - out)}>
             FLIGHT DELAY
           </Label>
-          <Label x={1560} y={608} size={22} fill={C.ink} opacity={crit}>
+          <Label x={1560} y={608} size={22} fill={C.ink} opacity={crit * (1 - out)}>
             CREW CHANGE
           </Label>
-          <Label x={960} y={1040} size={34} fill={C.gold} weight={900} opacity={stop}>
-            THE SYSTEM STOPS AND ASKS
+          <Label x={WX} y={930} size={30} fill={C.teal} weight={900} opacity={court}>
+            WITNESS: THE VOICE
+          </Label>
+          <Label x={JX} y={930} size={30} fill={C.gold} weight={900} opacity={sit}>
+            JUDGE: A PERSON
+          </Label>
+          <Label x={960} y={1030} size={34} fill={C.cream} weight={900} opacity={prog(t, ruleAt - 0.2, 0.7)}>
+            WITNESS, NOT JUDGE
           </Label>
         </>
       }
     >
-      <Hand x={960} y={190} size={120} fill={C.gold} opacity={title}>
-        human in the loop
-      </Hand>
+      <g opacity={title * (1 - out)}>
+        <Hand x={960} y={190} size={120} fill={C.gold}>
+          human in the loop
+        </Hand>
+      </g>
       {/* trigger 1: confidence too low */}
-      <g opacity={low}>
+      <g opacity={low * (1 - out)}>
         <rect x={220} y={300} width={520} height={340} rx={20} fill={C.cream} stroke={C.ink} strokeWidth={8} />
         <rect x={270} y={510} width={420} height={26} rx={13} fill={C.panel} stroke={C.ink} strokeWidth={5} />
         <rect x={272} y={512} width={mix(0, 420 * 0.55 - 4, low)} height={22} rx={11} fill={C.red} />
         <line x1={bx(0.75)} y1={496} x2={bx(0.75)} y2={552} stroke={C.gold} strokeWidth={8} strokeLinecap="round" />
       </g>
       {/* trigger 2: critical decision */}
-      <g opacity={crit}>
+      <g opacity={crit * (1 - out)}>
         <rect x={1180} y={300} width={520} height={340} rx={20} fill={C.cream} stroke={C.ink} strokeWidth={8} />
         <Ticket x={1320} y={500} s={1.1} flag />
         <CrewBadge x={1560} y={500} s={0.9} />
       </g>
-      {/* both end up with a person */}
-      <g opacity={who}>
-        <rect x={560} y={930} width={800} height={200} fill={C.panel} />
-        <rect x={560} y={920} width={800} height={22} fill={C.blue} stroke={C.ink} strokeWidth={6} />
-        <Bust x={960} y={790} s={1.3} skin={C.skinC} shirt="#5a6aa8" kind="controller" look={0} />
+      {/* the judge's seat: empty until a person takes the bench */}
+      <g opacity={court}>
+        <rect x={JX - 60} y={300} width={120} height={150} rx={18} fill={C.panel} stroke={C.ink} strokeWidth={8} />
       </g>
-      <g fill="none" stroke={C.cream} strokeWidth={7} strokeLinecap="round" strokeLinejoin="round">
-        <path d="M480 650 C480 740 640 720 780 790" pathLength={1} strokeDasharray={`${arrowLow} 2`} />
-        <path d="M1440 650 C1440 740 1280 720 1140 790" pathLength={1} strokeDasharray={`${arrowCrit} 2`} />
-        <path d="M740 790 L784 792 L772 750" opacity={arrowLow > 0.95 ? 1 : 0} />
-        <path d="M1180 790 L1136 792 L1148 750" opacity={arrowCrit > 0.95 ? 1 : 0} />
+      <g opacity={sit} transform={`translate(0 ${mix(40, 0, sit)})`}>
+        <Bust x={JX} y={400} s={1.15} skin={C.skinC} shirt="#5a6aa8" kind="controller" look={0} />
+      </g>
+      <g opacity={court}>
+        <rect x={JX - 300} y={500} width={600} height={150} rx={16} fill={C.blue} stroke={C.ink} strokeWidth={9} />
+        <rect x={JX - 300} y={486} width={600} height={30} rx={10} fill={C.gold} stroke={C.ink} strokeWidth={7} />
+      </g>
+      {/* the witness stand */}
+      <g opacity={court}>
+        <path d={`M${WX - 220} 640 L${WX + 220} 640 L${WX + 192} 900 L${WX - 192} 900 Z`} fill={C.cream} stroke={C.ink} strokeWidth={8} strokeLinejoin="round" />
+        <rect x={WX - 240} y={620} width={480} height={34} rx={10} fill={C.gold} stroke={C.ink} strokeWidth={7} />
+      </g>
+      {/* the voice, as a witness */}
+      <g opacity={court} transform={`translate(${WX} ${540 + wave * 4})`}>
+        <path d="M-70 110 C-70 0 70 0 70 110" fill={C.teal} stroke={C.ink} strokeWidth={8} />
+        <circle cx={0} cy={-34} r={54} fill={C.teal} stroke={C.ink} strokeWidth={8} />
+        <circle cx={-18} cy={-42} r={6} fill={C.ink} />
+        <circle cx={18} cy={-42} r={6} fill={C.ink} />
+        <ellipse cx={0} cy={-14} rx={14} ry={Math.abs(wave) * 8 + 4} fill={C.ink} />
+      </g>
+      {/* the testimony travels to the bench: a card, not a ruling */}
+      <g opacity={testify} transform={`translate(${mix(WX + 120, JX - 150, testify)} ${mix(600, 560, testify) - Math.sin(testify * Math.PI) * 90})`}>
+        <rect x={-85} y={-34} width={170} height={68} rx={10} fill={C.cream} stroke={C.gold} strokeWidth={7} />
+        <path d="M-60 -8 L60 -8 M-60 14 L14 14" stroke={C.ink} strokeOpacity={0.45} strokeWidth={6} strokeLinecap="round" />
       </g>
     </Art>
   );

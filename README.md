@@ -6,7 +6,7 @@ A narrated, animated explainer built with [Remotion](https://www.remotion.dev/).
     <img src="cover.png">
 </p>
 
-- 1920x1080 at 24 fps, about 5 minutes 41 seconds (341 s): a 7 s "Runway Rebels presents" intro, 13 narrated scenes (S1 to S16), the screen recording of the demo (`public/demo/video1.mp4`, about 130 s, with its own audio), then three closing scenes (S17 value, S18 rollout, S19 conclusion, about 1 minute). Narration is split into `ACT1` (13 scenes) and act 2 (3 scenes) in `timing.ts`.
+- 1920x1080 at 24 fps, about 5 minutes 46 seconds (346 s): a 7 s "Runway Rebels presents" intro, 13 narrated scenes (S1 to S16), the screen recording of the demo (`public/demo/video1.mp4`, about 130 s, with its own audio), then three closing scenes (S17 value, S18 rollout, S19 conclusion, about 1 minute). Narration is split into `ACT1` (13 scenes) and act 2 (3 scenes) in `timing.ts`.
 - One composition, `TwoClocks` (`src/Root.tsx`).
 - Narration is generated with ElevenLabs (voice: Matilda). The music bed and intro sound effect are in the repo, so you only need an ElevenLabs key if you change the narration.
 

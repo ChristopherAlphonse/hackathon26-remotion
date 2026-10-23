@@ -11,7 +11,7 @@ const SCENE_QUANTUM = BEAT; // scene lengths snap up to a whole beat
 import { ALIGN } from "./align"; // word start times in the raw clips (scripts/align-narration.mts)
 // Raw clip lengths (seconds) of public/twoclocks/n*.wav, regenerated with scripts/generate-narration.mts
 // (ElevenLabs eleven_v3, voice Matilda, "[upbeat]"). Played at VOICE_RATE.
-export const NARR_RAW: number[] = [20.35, 6.35, 9.40, 4.36, 9.56, 8.44, 5.64, 10.76, 14.11, 10.11, 9.72, 9.17, 9.17, 21.16, 23.64, 12.36];
+export const NARR_RAW: number[] = [20.35, 6.35, 9.40, 4.36, 9.56, 8.44, 5.64, 10.76, 20.51, 15.57, 9.72, 9.17, 9.17, 21.16, 23.64, 12.36];
 export const VOICE_RATE = 1;
 export const NARR: number[] = NARR_RAW.map((n) => Math.round((n / VOICE_RATE) * 100) / 100);
 export const TEXT: string[] = [
@@ -23,8 +23,8 @@ export const TEXT: string[] = [
  "Step two, who owns it? Hydraulic and delay point to flight operations, ninety-two percent. Other desks stay as runners-up.",
  "It keeps the receipt: the exact sentence behind the routing. Nobody takes it on trust.",
  "Step three matters most: compare with the flight system. Agree, nothing happens. Add something, it's noted. Contradict the record: that gap is the point.",
- "The temptation: update the flight. One score, hearing to routing. Seventy-five percent on a routine change, like a bag count, applies itself. Below, it asks a person. This one: ninety-two.",
- "Some decisions need a human in the loop: when confidence is too low, or the decision is critical, like a flight delay or crew change. The system stops and asks.",
+ "The temptation: update the flight. One score, hearing to routing. Seventy-five percent on a routine change, like a bag count, applies itself. Below, it asks a person. This one: ninety-two. It clears the confidence bar, but a flight delay is no bag count, so the second lock stays shut.",
+ "Some decisions need a human in the loop: when confidence is too low, or the decision is critical, like a flight delay or crew change. The voice is a witness, not a judge: it testifies, it doesn't rule. So the system stops, and a person takes the bench.",
  "The person sees the thirty-five-minute delay with consequences drawn: a crew near its duty limit, three passengers on a ten-minute connection, a gate conflict.",
  "The controller reads the evidence and approves. Only then does the record change, version-stamped. If the flight changed meanwhile, the write is refused.",
  "The answer was never a faster typist. It was letting the system listen, with a person's hand on the dial. We told you about it, now let's see it.",
