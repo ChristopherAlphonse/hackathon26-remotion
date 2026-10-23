@@ -34,7 +34,7 @@ You can run a server that serves dynamic images based on it's URL. Run
 npm run server
 ```
 
-And then visit `http://localhost:8000/PreviewCard.png?title=Hello+World` in your browser to render an image.
+And then visit `http://localhost:8000/TwoClocks.png` in your browser to render an image.
 
 - Specify the ID of the composition you want to render after the `/`. You can edit the compositions in `src/Video.tsx`.
 - Add either a `.png` or a `.jpeg` extension depending on which image format you want.

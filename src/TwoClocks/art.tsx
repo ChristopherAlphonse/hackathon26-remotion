@@ -233,7 +233,48 @@ export const BoardChar: React.FC<{
   );
 };
 
-// ---------- aircraft (side profile, nose to the right, no logos) ----------
+
+// ---------- the team, looking out of the window seats (order matches the credits) ----------
+type Hair = "full" | "bald" | "curly" | "long" | "cap";
+type Who = { skin: string; shirt: string; hair: Hair; beard?: boolean };
+const CREW: Who[] = [
+  { skin: C.skinA, shirt: "#b9a7e0", hair: "full", beard: true }, // Abhinav
+  { skin: C.skinB, shirt: C.cream, hair: "bald" }, // Christopher
+  { skin: C.skinB, shirt: C.muted, hair: "curly", beard: true }, // Ikechukwu
+  { skin: C.skinC, shirt: "#2b3550", hair: "long" }, // Jasmine
+  { skin: C.skinC, shirt: "#1d2540", hair: "cap", beard: true }, // Sam
+];
+const HAIR = "#1c120d";
+
+const Passenger: React.FC<Who & { cx: number; cy: number; id: number; windowFill: string }> = ({ cx, cy, id, windowFill, skin, shirt, hair, beard }) => (
+  <g>
+    <clipPath id={`pax${id}`}>
+      <circle cx={cx} cy={cy} r={13} />
+    </clipPath>
+    <circle cx={cx} cy={cy} r={13} fill={windowFill} stroke="none" />
+    <g clipPath={`url(#pax${id})`}>
+      <g transform={`translate(${cx} ${cy + 4}) scale(0.19)`} stroke={C.ink} strokeWidth={6} strokeLinejoin="round">
+        {hair === "long" ? <path d="M-54 60 Q-66 -84 0 -80 Q66 -84 54 60 Z" fill={HAIR} /> : null}
+        <path d="M-100 130 Q-100 44 -44 34 L44 34 Q100 44 100 130 Z" fill={shirt} />
+        <rect x={-15} y={8} width={30} height={34} fill={skin} />
+        <circle cx={0} cy={-26} r={46} fill={skin} />
+        {hair === "full" || hair === "curly" || hair === "cap" ? (
+          <path d="M-49 -28 Q-54 -94 0 -90 Q54 -94 49 -28 Q30 -58 0 -56 Q-30 -58 -49 -28" fill={HAIR} />
+        ) : null}
+        {hair === "curly" ? <path d="M-30 -80 Q-20 -96 -8 -84 Q4 -98 16 -84 Q30 -94 32 -78" fill={HAIR} /> : null}
+        {hair === "cap" ? <path d="M-52 -42 Q0 -104 52 -42 L60 -36 L-60 -36 Z" fill={C.blueDark} /> : null}
+        {hair === "long" ? <path d="M-47 -30 Q-40 -76 0 -72 Q40 -76 47 -30 Q22 -54 0 -52 Q-22 -54 -47 -30" fill={HAIR} /> : null}
+        {beard ? <path d="M-44 -12 Q-40 34 0 36 Q40 34 44 -12 Q24 12 0 12 Q-24 12 -44 -12" fill={HAIR} /> : null}
+        <circle cx={-16} cy={-28} r={6} fill={C.ink} stroke="none" />
+        <circle cx={16} cy={-28} r={6} fill={C.ink} stroke="none" />
+        {beard ? null : <path d="M-14 -8 Q0 4 14 -8" fill="none" strokeWidth={5} strokeLinecap="round" />}
+      </g>
+    </g>
+    <circle cx={cx} cy={cy} r={13} fill="none" strokeWidth={3} />
+  </g>
+);
+
+// ---------- aircraft (side profile, nose to the right, lettering only, no logo) ----------
 export const Plane: React.FC<{ x: number; y: number; s?: number; windowFill?: string; cockpit?: React.ReactNode }> = ({ x, y, s = 1, windowFill = C.cream, cockpit }) => (
   <g transform={`translate(${x} ${y}) scale(${s})`} stroke={C.ink} strokeWidth={7} strokeLinejoin="round">
     {/* tail */}
@@ -244,10 +285,19 @@ export const Plane: React.FC<{ x: number; y: number; s?: number; windowFill?: st
     <path d="M40 100 Q40 56 130 52 L560 52 Q680 58 712 102 Q680 146 560 150 L130 150 Q40 146 40 100 Z" fill={C.blue} />
     <path d="M70 120 L690 120 L702 128 Q690 142 560 146 L130 146 Q70 142 70 120 Z" fill={C.cream} stroke="none" />
     <path d="M60 108 L704 108 L708 118 L66 118 Z" fill={C.gold} stroke="none" />
+    <g stroke="none" fill={C.blueDark} fontFamily="Inter, sans-serif" fontWeight={900} textAnchor="middle">
+      <text x={190} y={139} fontSize={19} letterSpacing={3}>SOUTHWEST</text>
+      <text x={73} y={-8} fontSize={22} fill={C.ink} letterSpacing={1}>SWA</text>
+    </g>
     {/* windows */}
-    {Array.from({ length: 14 }).map((_, i) => (
-      <circle key={i} cx={190 + i * 30} cy={86} r={8} fill={windowFill} strokeWidth={3} />
-    ))}
+    {Array.from({ length: 14 }).map((_, i) => {
+      const who = CREW[i - 2];
+      return who ? (
+        <Passenger key={i} cx={190 + i * 30} cy={86} id={i} windowFill={windowFill} {...who} />
+      ) : (
+        <circle key={i} cx={190 + i * 30} cy={86} r={8} fill={windowFill} strokeWidth={3} />
+      );
+    })}
     <clipPath id="cockpitClip">
       <path d="M610 72 Q650 70 676 92 L640 94 Q620 92 610 72 Z" />
     </clipPath>
@@ -394,11 +444,11 @@ export const Tick: React.FC<{ x: number; y: number; s?: number; color?: string; 
   </g>
 );
 
-export const Ground: React.FC<{ y?: number }> = ({ y = 800 }) => (
+export const Ground: React.FC<{ y?: number; marks?: boolean }> = ({ y = 800, marks = true }) => (
   <g>
     <rect x={-20} y={y} width={1960} height={1080 - y + 20} fill={C.panel} />
     <rect x={-20} y={y} width={1960} height={10} fill={C.ink} />
-    {Array.from({ length: 9 }).map((_, i) => (
+    {marks && Array.from({ length: 9 }).map((_, i) => (
       <rect key={i} x={40 + i * 230} y={y + 120} width={120} height={10} rx={5} fill={C.gold} opacity={0.5} />
     ))}
   </g>

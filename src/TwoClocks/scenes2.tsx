@@ -8,6 +8,7 @@ import {
   Clock,
   CrewBadge,
   GateSign,
+  Ground,
   Hand,
   Label,
   Mug,
@@ -171,6 +172,19 @@ export const S12: React.FC = () => {
   const slip = prog(t, when(11, "can't open"), 0.8);
   const sysOpen = prog(t, when(11, "This system can"), 0.9);
   const merge = prog(t, when(11, "checks the testimony"), 1.2);
+  // the witness's arm, in the figure's own coordinates: upper arm 100 long, forearm 92 long
+  const rad = (d: number) => (d * Math.PI) / 180;
+  const a1 = rad(mix(100, 14, right) + slip * 18); // upper arm: hangs, rises, sags
+  const a2 = rad(mix(100, 4, right) + slip * 72); // forearm: hangs, reaches, drops
+  const arm = (() => {
+    const sx = 34;
+    const sy = 66;
+    const ex = sx + 100 * Math.cos(a1);
+    const ey = sy + 100 * Math.sin(a1);
+    const wx = ex + 92 * Math.cos(a2);
+    const wy = ey + 92 * Math.sin(a2);
+    return { sx, sy, ex, ey, wx, wy, hx: wx + 16 * Math.cos(a2), hy: wy + 16 * Math.sin(a2) };
+  })();
   return (
     <Art
       overlay={
@@ -193,12 +207,17 @@ export const S12: React.FC = () => {
       </g>
       {/* the Voice, as a witness */}
       <g transform={`translate(560 ${450 + wave * 4})`}>
+        {/* the arm: shoulder -> elbow -> wrist -> hand. It rises to reach, then the forearm drops: it can't open the files. Drawn first so the shoulder tucks behind the body. */}
+        <g opacity={right}>
+          <path d={`M${arm.sx} ${arm.sy} L${arm.ex} ${arm.ey} L${arm.wx} ${arm.wy}`} fill="none" stroke={C.ink} strokeWidth={40} strokeLinecap="round" strokeLinejoin="round" />
+          <path d={`M${arm.sx} ${arm.sy} L${arm.ex} ${arm.ey} L${arm.wx} ${arm.wy}`} fill="none" stroke={C.teal} strokeWidth={24} strokeLinecap="round" strokeLinejoin="round" />
+          <circle cx={arm.hx} cy={arm.hy} r={22} fill={C.teal} stroke={C.ink} strokeWidth={8} />
+        </g>
         <path d="M-70 110 C-70 0 70 0 70 110" fill={C.teal} stroke={C.ink} strokeWidth={8} />
         <circle cx={0} cy={-34} r={54} fill={C.teal} stroke={C.ink} strokeWidth={8} />
         <circle cx={-18} cy={-42} r={6} fill={C.ink} />
         <circle cx={18} cy={-42} r={6} fill={C.ink} />
         <ellipse cx={0} cy={-14} rx={14} ry={Math.abs(wave) * 8 + 4} fill={C.ink} />
-        <path d={`M62 40 C140 ${10 + slip * 40} 220 ${20 + slip * 30} ${300 - slip * 10} ${60 + slip * 70}`} fill="none" stroke={C.teal} strokeWidth={14} strokeLinecap="round" opacity={right} />
       </g>
       {/* filing cabinet */}
       <g opacity={right}>
@@ -275,9 +294,6 @@ export const S13: React.FC = () => {
           </Label>
           <Label x={960} y={1010} size={30} fill={C.cream} opacity={gate}>
             GATE CONFLICT
-          </Label>
-          <Label x={1860} y={1050} size={20} fill={C.muted} anchor="end">
-            ILLUSTRATIVE PLACEHOLDER DATA
           </Label>
         </>
       }
@@ -516,14 +532,15 @@ export const S17: React.FC = () => {
   const dial = Math.sin(t * 0.8) * 30;
   const flow = prog(t, when(16, "letting the system listen") - 0.5, 2.0);
   const ribbon = "M730 500 C950 380 1000 640 1180 520";
-  // the aerial: tiny ribbons that mostly reach nothing
-  const pts = Array.from({ length: 44 }).map((_, i) => {
-    const x = 120 + ((i * 421) % 1680);
-    const y = 150 + ((i * 263) % 760);
-    return { x, y, k: (i % 5) + 1, reach: i % 11 === 0 };
-  });
+  // the airport at dusk: everyone talking, their voices rising into the sky and fading, unheard
+  const crew: { x: number; kind: "pilot" | "ramp" | "controller" | "plain"; skin: string; shirt: string }[] = [
+    { x: 260, kind: "ramp", skin: C.skinA, shirt: "#4a5f9a" },
+    { x: 620, kind: "pilot", skin: C.skinB, shirt: C.cream },
+    { x: 980, kind: "controller", skin: C.skinC, shirt: "#5a4a9a" },
+    { x: 1340, kind: "ramp", skin: C.skinB, shirt: "#4a5f9a" },
+    { x: 1700, kind: "plain", skin: C.skinA, shirt: "#6a7fa8" },
+  ];
   const aerial = pull;
-  const shimmer = (i: number) => 0.55 + 0.45 * Math.sin(t * 3 + i);
   return (
     <Art
       overlay={
@@ -536,7 +553,11 @@ export const S17: React.FC = () => {
       <g opacity={1 - pull} transform={`translate(960 540) scale(${mix(1, 0.3, pull)}) translate(-960 -540)`}>
         <Clock cx={520} cy={500} r={210} rim={C.teal} {...leftHands} />
         <Clock cx={1400} cy={500} r={210} rim={C.gold} {...rightHands} />
-        <path d="M1590 440 C1640 400 1690 450 1664 520 C1650 560 1620 568 1610 600" fill={C.cream} stroke={C.ink} strokeWidth={8} strokeLinejoin="round" />
+        {/* the ear (same shape as scene 4), clear of the right clock whose rim ends at x=1610 */}
+        <g transform="translate(1745 500) scale(0.55) translate(-1400 -442)" stroke={C.ink} strokeLinejoin="round">
+          <path d="M1300 360 C1300 250 1460 230 1490 350 C1515 440 1440 500 1420 560 C1404 612 1345 640 1312 596" fill={C.cream} strokeWidth={9} />
+          <path d="M1352 380 C1362 338 1426 346 1432 396 C1436 438 1388 466 1378 520" fill="none" strokeWidth={8} strokeLinecap="round" />
+        </g>
         <Ribbon d={ribbon} p={flow} len={0.8} />
         {/* the shared dial under a human hand */}
         <circle cx={960} cy={810} r={90} fill={C.panel} stroke={C.cream} strokeWidth={8} />
@@ -548,27 +569,23 @@ export const S17: React.FC = () => {
           ))}
         </g>
       </g>
-      {/* the aerial view of the ramp */}
+      {/* the airport: voices rising and fading, unheard */}
       <g opacity={aerial}>
         <rect width={1920} height={1080} fill={C.navy} />
-        <g stroke={C.ink} strokeWidth={5}>
-          <rect x={200} y={300} width={1500} height={34} fill={C.panel} />
-          <rect x={200} y={760} width={1500} height={34} fill={C.panel} />
-          <rect x={520} y={470} width={880} height={150} rx={20} fill={C.blue} />
-          {Array.from({ length: 9 }).map((_, i) => (
-            <rect key={i} x={560 + i * 95} y={632} width={36} height={80} rx={14} fill={C.cream} />
-          ))}
-        </g>
-        {pts.map((p, i) => {
-          const d = `M${p.x} ${p.y} c ${20 * p.k} -40, ${50 + p.k * 6} -70, ${80} -22 s ${40} ${46} ${88} ${10}`;
+        <Ground y={800} marks={false} />
+        {crew.map((c, i) => {
+          const len = 0.45;
+          const cyc = (t * 0.22 + i * 0.37) % 1;
+          const p = cyc * (1 + len);
+          const sway = i % 2 ? -1 : 1;
+          const d = `M${c.x} 640 C${c.x + 90 * sway} 540 ${c.x - 90 * sway} 440 ${c.x + 20 * sway} 340 S${c.x - 60 * sway} 220 ${c.x + 30 * sway} 130`;
           return (
             <g key={i}>
-              <circle cx={p.x} cy={p.y} r={8} fill={C.cream} />
-              <path d={d} fill="none" stroke={C.teal} strokeWidth={6} strokeLinecap="round" strokeDasharray={p.reach ? undefined : "34 22"} opacity={(p.reach ? 0.95 : 0.7) * shimmer(i)} />
+              <Bust x={c.x} y={709} s={0.7} skin={c.skin} shirt={c.shirt} kind={c.kind} look={0} talk={Math.sin(t * 7 + i * 2) > 0 ? 1 : 0} />
+              <Ribbon d={d} p={p} len={len} w={10} opacity={0.9 * (1 - cyc * 0.85)} />
             </g>
           );
         })}
-        <circle cx={960} cy={548} r={14} fill={C.gold} />
       </g>
     </Art>
   );

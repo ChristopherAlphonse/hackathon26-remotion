@@ -104,7 +104,7 @@ export const S2: React.FC = () => {
   const ripple = lin(t, 3.0, 1.6);
   const walk = Math.max(0, t - when(1, "Maintenance"));
   const wx = mix(700, 1000, lin(t, when(1, "Maintenance"), 3.2));
-  const ribbon = "M-40 560 C 300 470 520 660 760 560 S 1000 500 1090 540";
+  const ribbon = "M-40 470 C 200 380 520 400 700 450 S 1000 480 1090 540";
   return (
     <Art>
       <rect width={1920} height={1080} fill="url(#dusk)" />
@@ -364,10 +364,12 @@ export const S7: React.FC = () => {
   ];
   const shoot = when(6, "Hydraulic");
   const zoom = mix(1, 1.25, prog(t, NARR[6] - 3.2, 2.4));
+  const zoomT = `translate(700 520) scale(${zoom}) translate(-700 -520)`;
   return (
     <Art
       overlay={
-        <>
+        // the overlay sits outside the zoomed drawing, so it needs the same zoom or the names and scores drift off their cards
+        <g transform={zoomT}>
           {cards.map((c) => (
             <Label key={c.name} x={c.x} y={760} size={24} fill={C.cream} opacity={prog(t, 0.6, 0.7)}>
               {c.name}
@@ -377,16 +379,16 @@ export const S7: React.FC = () => {
             .filter((c) => c.score)
             .map((c) => (
               <g key={c.score} opacity={prog(t, c.at, 0.5)}>
-                <rect x={c.x - 56} y={196} width={112} height={54} rx={12} fill={C.gold} />
-                <Label x={c.x} y={236} size={34} fill={C.ink} weight={900}>
+                <rect x={c.x - 56} y={650} width={112} height={54} rx={12} fill={C.gold} />
+                <Label x={c.x} y={690} size={34} fill={C.ink} weight={900}>
                   {c.score}
                 </Label>
               </g>
             ))}
-        </>
+        </g>
       }
     >
-      <g transform={`translate(700 520) scale(${zoom}) translate(-700 -520)`}>
+      <g transform={zoomT}>
         <g opacity={prog(t, 0.3, 0.7)}>
           <Strip x={250} y={560} w={380} h={120} lines={3} seed={5} />
         </g>
