@@ -6,42 +6,10 @@ import { endOf, when } from "./timing";
 // Everything is cued to the spoken words with when(); lines that are only on screen are not in the narration.
 
 // ---------- 17 · What earlier awareness is worth ----------
-type ChipIcon = "plane" | "wave" | "clock" | "tick";
-
-const BadgeIcon: React.FC<{ kind: ChipIcon }> = ({ kind }) => {
-  if (kind === "plane") {
-    return (
-      <g stroke={C.ink} strokeWidth={3} strokeLinejoin="round">
-        <path d="M-18 -4 L-23 -16 L-15 -16 L-7 -4 Z" fill={C.blue} />
-        <path d="M-2 -4 L-12 -23 L-3 -23 L11 -4 Z" fill={C.blue} />
-        <rect x={-23} y={-5} width={46} height={11} rx={5.5} fill={C.cream} />
-      </g>
-    );
-  }
-  if (kind === "wave") {
-    return <path d="M-22 0 l7 -13 l7 26 l7 -36 l7 36 l7 -26 l7 13" fill="none" stroke={C.teal} strokeWidth={5} strokeLinecap="round" strokeLinejoin="round" />;
-  }
-  if (kind === "clock") {
-    return (
-      <g stroke={C.ink} strokeWidth={4} strokeLinecap="round">
-        <circle r={19} fill={C.cream} />
-        <line x1={0} y1={0} x2={0} y2={-13} />
-        <line x1={0} y1={0} x2={9} y2={5} />
-      </g>
-    );
-  }
-  return <Tick x={0} y={0} s={0.8} />;
-};
-
 export const S17: React.FC = () => {
   const t = useT();
   const title = prog(t, when(13, "What is earlier") - 0.1, 0.8);
-  const chips: { x: number; big: string; cap: string; at: number; icon: ChipIcon }[] = [
-    { x: 270, big: "5,000", cap: "flights a day", at: when(13, "five thousand") - 0.25, icon: "plane" },
-    { x: 730, big: "10%", cap: "voice events worth catching", at: when(13, "Ten percent") - 0.25, icon: "wave" },
-    { x: 1190, big: "6 min", cap: "earlier awareness", at: when(13, "six minutes") - 0.25, icon: "clock" },
-    { x: 1650, big: "20%", cap: "becomes real time back", at: when(13, "a fifth") - 0.25, icon: "tick" },
-  ];
+  // The impact leads. The numbers land as they are spoken; the calculation is a quiet line that only appears after them.
   const aFrom = when(13, "two hundred");
   const aTo = when(13, "aircraft minutes") + 0.3;
   const bFrom = when(13, "roughly");
@@ -50,26 +18,34 @@ export const S17: React.FC = () => {
   const pB = seg(t, bFrom, bTo);
   const cardA = prog(t, aFrom - 0.5, 0.7);
   const cardB = prog(t, bFrom - 0.5, 0.7);
-  const bracket = prog(t, aFrom - 1.1, 0.8);
-  const tagsHead = prog(t, bFrom - 0.2, 0.6);
-  const tags = [
-    ["Maintenance delays", "Turn delays", "Fueling · cleaning · bags · pushback", "Gate conflicts"],
-    ["Crew impacts", "Misconnect risk", "IROPs coordination"],
+  const calc = prog(t, when(13, "It starts with"), 0.9);
+  const tagsHead = prog(t, when(13, "That time can come") - 0.1, 0.6);
+  // each tag lands on the word that names it
+  const tags: { s: string; at: number }[][] = [
+    [
+      { s: "Maintenance delays", at: when(13, "maintenance") - 0.1 },
+      { s: "Turn delays", at: when(13, "turns") - 0.1 },
+      { s: "Fueling · cleaning · bags · pushback", at: when(13, "turns") + 0.25 },
+      { s: "Gate conflicts", at: when(13, "gates") - 0.1 },
+    ],
+    [
+      { s: "Crew impacts", at: when(13, "crews") - 0.1 },
+      { s: "Misconnect risk", at: when(13, "connections") - 0.1 },
+      { s: "IROPs coordination", at: when(13, "connections") + 0.3 },
+    ],
   ];
   const tagW = (s: string) => s.length * 12.5 + 44;
-  let k = 0;
   const tagItems = tags.flatMap((row, r) => {
-    const total = row.reduce((a, s) => a + tagW(s), 0) + (row.length - 1) * 24;
+    const total = row.reduce((a, g) => a + tagW(g.s), 0) + (row.length - 1) * 24;
     let x = 960 - total / 2;
-    return row.map((s) => {
-      const w = tagW(s);
-      const item = { s, x, w, y: 880 + r * 54, o: prog(t, bFrom + k * 0.3, 0.5) };
+    return row.map((g) => {
+      const w = tagW(g.s);
+      const item = { s: g.s, x, w, y: 800 + r * 54, o: prog(t, g.at, 0.5) };
       x += w + 24;
-      k++;
       return item;
     });
   });
-  const note = prog(t, when(13, "An illustrative"), 0.8);
+  const note = prog(t, bTo, 0.8);
   return (
     <Art
       overlay={
@@ -77,47 +53,33 @@ export const S17: React.FC = () => {
           <Hand x={960} y={140} size={92} fill={C.gold} opacity={title}>
             Earlier awareness = operational value
           </Hand>
-          {chips.map((c) => {
-            const o = prog(t, c.at, 0.6);
-            return (
-              <g key={c.big} opacity={o}>
-                <Label x={c.x} y={296} size={58} fill={C.gold} weight={900} spacing={0}>
-                  {c.big}
-                </Label>
-                <Label x={c.x} y={342} size={22} fill={C.cream} weight={700} spacing={0.5}>
-                  {c.cap}
-                </Label>
-              </g>
-            );
-          })}
-          {[500, 960, 1420].map((x, i) => (
-            <Label key={x} x={x} y={314} size={54} fill={C.cream} weight={900} opacity={prog(t, chips[i + 1].at, 0.5)}>
-              ×
-            </Label>
-          ))}
           <g opacity={cardA}>
-            <Label x={500} y={612} size={150} fill={C.gold} weight={900} spacing={-2} opacity={pA > 0 ? 1 : 0}>
+            <Label x={500} y={392} size={150} fill={C.gold} weight={900} spacing={-2} opacity={pA > 0 ? 1 : 0}>
               {`~${Math.round(219 * pA)}K`}
             </Label>
-            <Label x={500} y={680} size={26} fill={C.cream}>
+            <Label x={500} y={460} size={26} fill={C.cream}>
               AIRCRAFT MINUTES RECOVERED PER YEAR*
             </Label>
-            <Label x={500} y={732} size={30} fill={C.muted} weight={500} spacing={0.5}>
+            <Label x={500} y={512} size={30} fill={C.muted} weight={500} spacing={0.5}>
               ≈ 3,650 aircraft hours
             </Label>
           </g>
           <g opacity={cardB}>
-            <Label x={1420} y={612} size={150} fill={C.gold} weight={900} spacing={-2} opacity={pB > 0 ? 1 : 0}>
+            <Label x={1420} y={392} size={150} fill={C.gold} weight={900} spacing={-2} opacity={pB > 0 ? 1 : 0}>
               {`~$${(21.6 * pB).toFixed(1)}M`}
             </Label>
-            <Label x={1420} y={680} size={26} fill={C.cream}>
+            <Label x={1420} y={460} size={26} fill={C.cream}>
               GROSS ANNUAL OPERATING-COST OPPORTUNITY*
             </Label>
-            <Label x={1420} y={732} size={30} fill={C.muted} weight={500} spacing={0.5}>
+            <Label x={1420} y={512} size={30} fill={C.muted} weight={500} spacing={0.5}>
               at $98.41 per aircraft block minute
             </Label>
           </g>
-          <Label x={960} y={838} size={22} fill={C.muted} opacity={tagsHead}>
+          {/* the calculation: one small muted line, never on screen without the results above it */}
+          <Label x={960} y={622} size={24} fill={C.muted} weight={500} spacing={0.3} opacity={calc * 0.85}>
+            5,000 flights/day × 365 days × 10% × 6 min × 20% = 219K min → × $98.41 = $21.6M
+          </Label>
+          <Label x={960} y={742} size={22} fill={C.muted} opacity={tagsHead}>
             WHERE THE TIME CAN COME FROM
           </Label>
           {tagItems.map((g) => (
@@ -126,41 +88,19 @@ export const S17: React.FC = () => {
             </Label>
           ))}
           <g opacity={note}>
-            <Label x={960} y={1010} size={19} fill={C.muted} weight={500} spacing={0.2}>
-              * Illustrative model: 5,000 flights/day × 10% qualifying events × 6 min earlier × 20% realized × $98.41 per block minute.
-            </Label>
-            <Label x={960} y={1038} size={19} fill={C.muted} weight={500} spacing={0.2}>
-              Event rate, lead time and realization are planning assumptions to validate in a pilot, not measured Southwest results.
+            <Label x={960} y={1030} size={19} fill={C.muted} weight={500} spacing={0.2}>
+              * Illustrative model. Event rate, lead time and realization are planning assumptions to validate in a pilot, not measured Southwest results.
             </Label>
           </g>
         </>
       }
     >
-      {/* the four assumptions */}
-      {chips.map((c) => {
-        const o = prog(t, c.at, 0.6);
-        return (
-          <g key={c.big} opacity={o} transform={`translate(0 ${mix(24, 0, o)})`}>
-            <rect x={c.x - 185} y={235} width={370} height={130} rx={18} fill={C.panel} stroke={C.ink} strokeWidth={7} />
-            <g transform={`translate(${c.x - 165} 238)`}>
-              <circle r={34} fill={C.panel} stroke={C.gold} strokeWidth={7} />
-              <BadgeIcon kind={c.icon} />
-            </g>
-          </g>
-        );
-      })}
-      {/* bracket from the assumptions down to the results */}
-      <g opacity={bracket} fill="none" stroke={C.cream} strokeWidth={5} strokeLinecap="round" strokeLinejoin="round" strokeDasharray="14 12">
-        <path d="M270 380 L270 410 L1650 410 L1650 380" />
-        <path d="M960 410 L960 452" strokeDasharray="none" />
-        <path d="M936 432 L960 456 L984 432" strokeDasharray="none" />
-      </g>
       {/* the two results */}
       <g opacity={cardA} transform={`translate(0 ${mix(30, 0, cardA)})`}>
-        <rect x={100} y={480} width={800} height={290} rx={22} fill={C.panel} stroke={C.gold} strokeWidth={9} />
+        <rect x={100} y={262} width={800} height={290} rx={22} fill={C.panel} stroke={C.gold} strokeWidth={9} />
       </g>
       <g opacity={cardB} transform={`translate(0 ${mix(30, 0, cardB)})`}>
-        <rect x={1020} y={480} width={800} height={290} rx={22} fill={C.panel} stroke={C.gold} strokeWidth={9} />
+        <rect x={1020} y={262} width={800} height={290} rx={22} fill={C.panel} stroke={C.gold} strokeWidth={9} />
       </g>
       {/* where the time can come from */}
       {tagItems.map((g) => (
@@ -370,8 +310,8 @@ export const S19: React.FC = () => {
   const listen = when(15, "Let the system listen");
   const evidence = when(15, "show its evidence");
   const handAt = when(15, "keep a person's hand");
-  const everyDesk = when(15, "every desk");
-  const same = when(15, "same clock");
+  const everyDesk = when(15, "operations can perform");
+  const same = when(15, "headstart");
   const titleAt = endOf(15) + 0.2;
 
   const clocksIn = prog(t, knows - 0.2, 0.9);

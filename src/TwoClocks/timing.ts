@@ -11,7 +11,7 @@ const SCENE_QUANTUM = BEAT; // scene lengths snap up to a whole beat
 import { ALIGN } from "./align"; // word start times in the raw clips (scripts/align-narration.mts)
 // Raw clip lengths (seconds) of public/twoclocks/n*.wav, regenerated with scripts/generate-narration.mts
 // (ElevenLabs eleven_v3, voice Matilda, "[upbeat]"). Played at VOICE_RATE.
-export const NARR_RAW: number[] = [20.35, 6.35, 9.40, 4.36, 9.56, 8.44, 5.64, 10.76, 20.51, 15.57, 9.72, 9.17, 9.17, 21.16, 23.64, 12.36];
+export const NARR_RAW: number[] = [20.35, 6.35, 9.40, 4.36, 9.56, 8.44, 5.64, 10.76, 20.51, 15.57, 9.72, 9.17, 9.17, 22.36, 23.64, 11.96];
 export const VOICE_RATE = 1;
 export const NARR: number[] = NARR_RAW.map((n) => Math.round((n / VOICE_RATE) * 100) / 100);
 export const TEXT: string[] = [
@@ -29,9 +29,9 @@ export const TEXT: string[] = [
  "The controller reads the evidence and approves. Only then does the record change, version-stamped. If the flight changed meanwhile, the write is refused.",
  "The answer was never a faster typist. It was letting the system listen, with a person's hand on the dial. We told you about it, now let's see it.",
  // ---- after the demo (video1) ----
- "What is earlier awareness worth? Take five thousand flights a day. Ten percent have a voice event worth catching, six minutes early, and a fifth becomes real time back. That's about two hundred nineteen thousand aircraft minutes a year: roughly twenty-one point six million dollars. An illustrative model, to prove in a pilot.",
+ "What is earlier awareness worth? About two hundred nineteen thousand aircraft minutes a year: roughly twenty-one point six million dollars. It starts with five thousand flights a day, the voice events that matter, caught a few minutes sooner, with some of it becoming real time back. That time can come from maintenance, turns, gates, crews and connections.",
  "We roll it out in four steps, each one earning the next. Shadow: listen and measure, with no writes. Assist: people approve every proposal. Controlled automation: only proven, low-risk updates, while flight status, crews and gates stay human. Then network scale, wave by wave, on Southwest's own systems.",
- "The communications are there. The only question is how long everyone else waits. Let the system listen, show its evidence, and keep a person's hand on the dial, and every desk plans from the same clock."
+ "The communications are there. The only question is how long everyone else waits. Let the system listen, show its evidence, and keep a person's hand on the dial, and operations can perform with a headstart."
 ];
 // ---- Schedule ----
 // Act 1 = scenes 1 to 13 (before the demo). Then the demo video plays on its own, and act 2 = scenes 14 to 16 (value, rollout, conclusion).
