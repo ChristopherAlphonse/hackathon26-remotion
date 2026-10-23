@@ -1,5 +1,5 @@
 // Generated from the narration audio (public/twoclocks/n*.wav) and the script in
-// presentation/educational-video-package.md. Durations are the real lengths of the ElevenLabs TTS clips (voice: Matilda).
+// presentation/educational-video-package.md. Durations are the real lengths of the ElevenLabs TTS clips (voice: christopher alphonse, cloned).
 export const FPS = 24;
 // The music bed (public/music/bed.mp3) is 120 BPM: one beat = 0.5 s. Every scene start and every spoken line
 // lands on a beat, so the cuts and the voice are in time with the track.
@@ -10,8 +10,8 @@ const MIN_TAIL = 0.25; // minimum breathing room after each line
 const SCENE_QUANTUM = BEAT; // scene lengths snap up to a whole beat
 import { ALIGN } from "./align"; // word start times in the raw clips (scripts/align-narration.mts)
 // Raw clip lengths (seconds) of public/twoclocks/n*.wav, regenerated with scripts/generate-narration.mts
-// (ElevenLabs eleven_v3, voice Matilda, "[upbeat]"). Played at VOICE_RATE.
-export const NARR_RAW: number[] = [20.35, 6.35, 9.40, 4.36, 9.56, 8.44, 5.64, 10.76, 20.51, 15.57, 9.72, 9.17, 9.17, 22.36, 23.64, 11.96];
+// (ElevenLabs eleven_v4, one request per scene; scenes 1-13 voice "christopher alphonse" (cloned), scenes 14-16 after the demo voice wqPxhqgBjy3XEcKc6PJp). Played at VOICE_RATE.
+export const NARR_RAW: number[] = [18.29, 7.00, 9.87, 4.68, 9.56, 9.87, 6.03, 11.89, 20.61, 17.24, 9.95, 9.87, 9.64, 21.00, 21.97, 12.43];
 export const VOICE_RATE = 1;
 export const NARR: number[] = NARR_RAW.map((n) => Math.round((n / VOICE_RATE) * 100) / 100);
 export const TEXT: string[] = [
@@ -20,7 +20,7 @@ export const TEXT: string[] = [
  "Two clocks. One shows reality: this flight isn't leaving at 3:40. The other shows our current systems. We're missing out on a headstart!",
  "Could the system hear what was already said out loud, and listen without taking over?",
  "Step one, hearing: Extract text from verbal communications with a confidence score, from how clean the audio is and how plausible at an airport.",
- "Step two, who owns it? Hydraulic and delay point to flight operations, ninety-two percent. Other desks stay as runners-up.",
+ "Step two, who owns it? Hydraulic and delay point to flight operations, ninety-two percent. Other areas or teams stay as runners-up.",
  "It keeps the receipt: the exact sentence behind the routing. Nobody takes it on trust.",
  "Step three matters most: compare with the flight system. Agree, nothing happens. Add something, it's noted. Contradict the record: that gap is the point.",
  "The temptation: update the flight. One score, hearing to routing. Seventy-five percent on a routine change, like a bag count, applies itself. Below, it asks a person. This one: ninety-two. It clears the confidence bar, but a flight delay is no bag count, so the second lock stays shut.",
@@ -71,19 +71,21 @@ const planMusic = (start: number, from: number, target: number): MusicPlan => {
 
 // act 1: the drop lands exactly on the cut into scene 2
 export const MUSIC1 = planMusic(BASE_SEC[0] - MUSIC_INTRO, 0, ACT1_BASE);
-// No end credits: the leftover (under 4 s) is added to the last scene of the act, so the music's own ending lands on the last frame.
+// The leftover (under 4 s) is added to the last scene of act 1, so the music's own ending lands on the last frame of the act.
 export const ACT1_SEC = ACT1_BASE + MUSIC1.credits;
 export const DEMO_START = ACT1_SEC - X_IN;
 export const ACT2_START = DEMO_START + DEMO_SEC - X_OUT;
-// act 2: the groove enters on the cut from the demo
-export const MUSIC2 = planMusic(ACT2_START, MUSIC_INTRO, ACT2_START + ACT2_BASE);
-export const TOTAL_SEC = ACT2_START + ACT2_BASE + MUSIC2.credits;
+// act 2: the groove enters on the cut from the demo, and the track's ending lands on the last frame of the credits
+const MIN_CREDITS = 8; // seconds of end credits after the conclusion
+export const MUSIC2 = planMusic(ACT2_START, MUSIC_INTRO, ACT2_START + ACT2_BASE + MIN_CREDITS);
+export const CREDITS_SEC = MIN_CREDITS + MUSIC2.credits;
+export const TOTAL_SEC = ACT2_START + ACT2_BASE; // the last narrated scene ends here; the credits follow
 export const TOTAL_FRAMES = Math.round(TOTAL_SEC * FPS);
 
 export const SCENE_START = BASE_SEC.map((_, i) =>
   i < ACT1 ? BASE_SEC.slice(0, i).reduce((a, b) => a + b, 0) : ACT2_START + BASE_SEC.slice(ACT1, i).reduce((a, b) => a + b, 0),
 );
-export const SCENE_SEC = BASE_SEC.map((x, i) => (i === ACT1 - 1 ? x + MUSIC1.credits : i === BASE_SEC.length - 1 ? x + MUSIC2.credits : x));
+export const SCENE_SEC = BASE_SEC.map((x, i) => (i === ACT1 - 1 ? x + MUSIC1.credits : x));
 
 /** Seconds into scene `i` (0-based) at which `phrase` starts being spoken (measured from the audio, see align.json). */
 export const when = (i: number, phrase: string): number => {

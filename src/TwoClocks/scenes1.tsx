@@ -36,31 +36,72 @@ export const S1: React.FC = () => {
   const line2At = when(0, "Maintenance is walking");
   const line3At = when(0, "Probably thirty");
   const p = seg(t, callAt - 0.1, line2At);
+  const hydT = when(0, "hydraulic");
+  const hydP = prog(t, hydT - 0.3, 0.6);
+  const pulse = 0.5 + 0.5 * Math.sin(t * 6);
+  // where the hydraulic bay sits on screen (wing root, under the fuselage), after the slow zoom
+  const bayX = 1330 + (40 + 2 * 420 - 1330) * zoom;
+  const bayY = 650 + (420 + 2 * 130 - 650) * zoom;
+  const BUB_Y = 380;
   const talk = t > callAt && t < LEAD + NARR[0] ? (Math.sin(t * 16) > -0.2 ? 1 : 0.15) : 0;
   const ribbon = "M1345 640 C1440 560 1500 420 1600 470 C1700 520 1700 640 1780 600 C1860 560 1880 700 1800 770";
   return (
     <Art
       overlay={
         <>
-          <g opacity={prog(t, 0.4, 0.8)}>
+          <g opacity={prog(t, 0.4, 0.8) * (1 - prog(t, callAt - 0.4, 0.5))}>
             <rect x={110} y={84} width={640} height={64} rx={12} fill={C.cream} />
             <Label x={430} y={128} size={30} fill={C.ink}>
-              WN1628 · GATE A12 · PUSH 15:40
+              WN1628 · GATE A12 · PUSH 3:40 PM
             </Label>
           </g>
           <g opacity={prog(t, callAt - 0.2, 0.5)}>
-            <rect x={200} y={826} width={1520} height={206} rx={16} fill={C.panel} fillOpacity={0.94} stroke={C.teal} strokeWidth={4} />
-            <Label x={240} y={870} size={24} fill={C.teal} anchor="start" spacing={3}>
-              CAPTAIN · GROUND FREQUENCY · 15:36
+            <rect x={200} y={34} width={1520} height={172} rx={16} fill={C.panel} fillOpacity={0.94} stroke={C.teal} strokeWidth={4} />
+            <Label x={240} y={78} size={24} fill={C.teal} anchor="start" spacing={3}>
+              CAPTAIN · GROUND FREQUENCY · 3:36 PM
             </Label>
-            <Label x={240} y={922} size={38} fill={C.cream} anchor="start" spacing={0.5} opacity={prog(t, callAt, 0.4)}>
-              “Ground, WN1628. We have a hydraulic system two caution.
+            {/* the first two lines fade out when the last one is spoken, so only one block is on screen at a time */}
+            <g opacity={1 - prog(t, line3At - 0.1, 0.4)}>
+              <Label x={240} y={130} size={38} fill={C.cream} anchor="start" spacing={0.5} opacity={prog(t, callAt, 0.4)}>
+                “Ground, WN1628. We have a hydraulic system two caution.
+              </Label>
+              <Label x={240} y={178} size={38} fill={C.cream} anchor="start" spacing={0.5} opacity={prog(t, line2At, 0.4)}>
+                Maintenance is walking out to us now.
+              </Label>
+            </g>
+            <Label x={240} y={158} size={44} fill={C.gold} anchor="start" spacing={0.5} opacity={prog(t, line3At + 0.1, 0.4)}>
+              “Probably thirty to forty minutes before we can push.”
             </Label>
-            <Label x={240} y={970} size={38} fill={C.cream} anchor="start" spacing={0.5} opacity={prog(t, line2At, 0.4)}>
-              Maintenance is walking out to us now.
+          </g>
+          {/* hydraulic close-up: appears as "hydraulic" is spoken, pointing at where the equipment sits */}
+          <g opacity={hydP}>
+            <line x1={bayX} y1={bayY - 20} x2={bayX} y2={BUB_Y + 140} stroke={C.gold} strokeWidth={4} strokeDasharray="10 8" />
+            <circle cx={bayX} cy={BUB_Y} r={140} fill={C.panel} stroke={C.gold} strokeWidth={6} />
+            <g transform={`translate(${bayX} ${BUB_Y})`}>
+              {/* reservoir */}
+              <rect x={-100} y={-70} width={80} height={110} rx={12} fill={C.ink} stroke={C.cream} strokeWidth={4} />
+              <rect x={-96} y={-30} width={72} height={66} rx={8} fill={C.teal} opacity={0.85} />
+              <Label x={-56} y={64} size={18} fill={C.cream} spacing={1}>
+                RESERVOIR
+              </Label>
+              {/* tubes */}
+              <path d="M-20 -10 L26 -10" stroke={C.teal} strokeWidth={8} strokeLinecap="round" strokeDasharray="12 10" strokeDashoffset={-t * 40} />
+              <path d="M96 -10 L112 -10 L112 52" stroke={C.teal} strokeWidth={8} fill="none" strokeLinecap="round" strokeDasharray="12 10" strokeDashoffset={-t * 40} />
+              {/* pump */}
+              <circle cx={62} cy={-10} r={38} fill={C.blueDark} stroke={C.cream} strokeWidth={4} />
+              <g transform={`translate(62 -10) rotate(${t * 140})`} stroke={C.cream} strokeWidth={6} strokeLinecap="round">
+                <line x1={-22} y1={0} x2={22} y2={0} />
+                <line x1={0} y1={-22} x2={0} y2={22} />
+              </g>
+              <Label x={62} y={64} size={18} fill={C.cream} spacing={1}>
+                PUMP
+              </Label>
+            </g>
+            <Label x={bayX + 170} y={BUB_Y - 8} size={36} fill={C.gold} anchor="start" spacing={2}>
+              HYDRAULIC SYSTEM 2
             </Label>
-            <Label x={240} y={1018} size={38} fill={C.gold} anchor="start" spacing={0.5} opacity={prog(t, line3At, 0.4)}>
-              Probably thirty to forty minutes before we can push.”
+            <Label x={bayX + 170} y={BUB_Y + 34} size={26} fill={C.cream} anchor="start" spacing={0.5} weight={500}>
+              Powers the flaps, brakes and landing gear
             </Label>
           </g>
         </>
@@ -91,6 +132,11 @@ export const S1: React.FC = () => {
           windowFill={C.panel}
           cockpit={<Bust x={643} y={100} s={0.28} skin={C.skinB} shirt={C.cream} kind="pilot" talk={talk} />}
         />
+        <g transform="translate(40 420) scale(2)" opacity={hydP} fill="none" strokeLinecap="round">
+          <path d="M420 130 L322 206" stroke={C.teal} strokeWidth={5} strokeDasharray="12 10" strokeDashoffset={-t * 30} />
+          <path d="M470 134 L630 134" stroke={C.teal} strokeWidth={5} strokeDasharray="12 10" strokeDashoffset={-t * 30} />
+          <rect x={372} y={112} width={96} height={38} rx={8} stroke={C.gold} strokeWidth={5 + 3 * pulse} strokeDasharray="10 6" fill={C.gold} fillOpacity={0.18 + 0.18 * pulse} />
+        </g>
         <Ribbon d={ribbon} p={p} len={0.55} />
       </g>
     </Art>
@@ -134,11 +180,8 @@ export const S2: React.FC = () => {
         <rect x={1120} y={200} width={660} height={560} rx={16} fill="#1c2c52" stroke={C.ink} strokeWidth={9} />
         <rect x={1140} y={220} width={620} height={520} rx={8} fill="#26396b" />
         <BoardChar x={1450} y={470} s={0.9} status="ON TIME" />
-        <Hand x={1450} y={262} size={56} fill={C.teal} opacity={prog(t, when(1, "Flight Operations"), 0.6)}>
+        <Hand x={1450} y={165} size={56} fill={C.teal} opacity={prog(t, when(1, "Flight Operations"), 0.6)}>
           Flight Ops system
-        </Hand>
-        <Hand x={1450} y={870} size={46} fill={C.cream} opacity={prog(t, when(1, "the record"), 0.6)}>
-          crews · gates · connections plan from this
         </Hand>
         <path d="M1450 200 L1450 760 M1120 480 L1780 480" stroke={C.ink} strokeWidth={8} opacity={0.5} />
         {/* ramp lead + maintenance */}
@@ -182,10 +225,10 @@ export const S3: React.FC = () => {
           our current systems
         </Hand>
         <Hand x={560} y={925} size={44} fill={C.cream} opacity={prog(t, when(2, "this flight"), 0.7)}>
-          WN1628 is really leaving ~16:15
+          WN1628 is really leaving ~4:15 PM
         </Hand>
         <Hand x={1360} y={925} size={44} fill={C.cream} opacity={prog(t, when(2, "The other"), 0.7)}>
-          Flight Ops: WN1628 on time 15:40
+          Flight Ops: WN1628 on time 3:40 PM
         </Hand>
         {/* the gap */}
         <g opacity={gapIn}>
@@ -211,9 +254,9 @@ export const S4: React.FC = () => {
   const t = useT();
   const hearAt = when(3, "Could the system");
   const listenAt = when(3, "and listen");
+  const overAt = when(3, "without taking");
   const p = seg(t, hearAt, listenAt);
   const lean = seg(t, listenAt, endOf(3));
-  const handUp = seg(t, listenAt, endOf(3));
   const ribbon = "M520 440 C760 330 880 590 1120 450 C1180 420 1230 430 1290 450";
   return (
     <Art>
@@ -233,20 +276,12 @@ export const S4: React.FC = () => {
         <circle cx={1470} cy={560} r={0} />
       </g>
       <Ribbon d={ribbon} p={p} len={1} />
-      {/* the dial: a needle that swings toward "decide" but is held back */}
-      <g opacity={prog(t, when(3, "and listen"), 0.8)}>
-        <circle cx={960} cy={830} r={130} fill={C.panel} stroke={C.cream} strokeWidth={9} />
-        {Array.from({ length: 11 }).map((_, i) => (
-          <line key={i} x1={0} y1={-112} x2={0} y2={-92} stroke={C.cream} strokeWidth={7} strokeLinecap="round" transform={`translate(960 830) rotate(${-120 + i * 24})`} />
-        ))}
-        <line x1={960} y1={830} x2={960} y2={745} stroke={C.gold} strokeWidth={12} strokeLinecap="round" transform={`rotate(${mix(-100, -20, handUp)} 960 830)`} />
-        <circle cx={960} cy={830} r={14} fill={C.gold} stroke={C.ink} strokeWidth={5} />
-      </g>
       {/* hand-lettered question */}
-      <Hand x={960} y={180} size={96} fill={C.cream} opacity={prog(t, hearAt, 0.7)}>
+      {/* the second question replaces the first in the same spot */}
+      <Hand x={960} y={180} size={96} fill={C.cream} opacity={prog(t, hearAt, 0.7) * (1 - prog(t, overAt - 0.1, 0.5))}>
         Could the system hear it?
       </Hand>
-      <Hand x={960} y={300} size={80} fill={C.gold} opacity={prog(t, when(3, "without taking"), 0.7)}>
+      <Hand x={960} y={180} size={96} fill={C.gold} opacity={prog(t, overAt, 0.7)}>
         ...without it taking over?
       </Hand>
     </Art>
@@ -256,7 +291,22 @@ export const S4: React.FC = () => {
 // ---------- 5 · Step one: hear ----------
 export const S5: React.FC = () => {
   const t = useT();
+  const hearAt = when(4, "Step one");
+  const extractAt = when(4, "Extract text");
+  const confAt = when(4, "confidence score");
+  // the radio call is heard first (live waveform), then typed into the strip while "extract text" is said
+  const CALL = ["“Ground, WN1628. We have a hydraulic system two caution.", "Maintenance is walking out to us now.", "Probably thirty to forty minutes before we can push.”"];
+  let typed = Math.floor(CALL.join("").length * segLin(t, extractAt, confAt));
+  const typedLines = CALL.map((l) => {
+    const n = Math.max(0, Math.min(l.length, typed));
+    typed -= l.length;
+    return l.slice(0, n);
+  });
+  const waveOut = 1 - prog(t, confAt - 0.5, 0.5);
   const drops = [when(4, "how clean"), when(4, "how plausible"), when(4, "at an airport")];
+  // one thing at a time: the transcript clears before the gauge appears, and each signal clears after it drops its ball into the gauge
+  const stripOut = 1 - prog(t, confAt, 0.4);
+  const feederVis = (d: number) => prog(t, d - 0.35, 0.5) * (1 - prog(t, d + 0.3, 0.4));
   const levels = drops.map((d) => prog(t, d + 0.7, 0.7));
   const value = 0.22 * levels[0] + 0.3 * levels[1] + 0.42 * levels[2];
   const conf = value + (value > 0.9 ? 0.0 : 0) ;
@@ -272,49 +322,69 @@ export const S5: React.FC = () => {
     <Art
       overlay={
         <>
+          {typedLines.map((l, i) => (
+            <Label key={i} x={490} y={222 + i * 42} size={28} fill={C.ink} anchor="start" spacing={0} weight={600} opacity={stripOut}>
+              {l}
+            </Label>
+          ))}
+          <Label x={gx} y={600} size={26} opacity={prog(t, hearAt, 0.6) * waveOut}>
+            RADIO AUDIO
+          </Label>
+          <Label x={gx} y={gy - 70} size={28} fill={C.cream} spacing={4} opacity={prog(t, confAt + 0.6, 0.5)}>
+            CONFIDENCE
+          </Label>
           <Label x={gx} y={936} size={104} fill={C.gold} weight={900} opacity={levels[2]}>
             {(Math.min(0.94, conf)).toFixed(2)}
           </Label>
           {feeders.map((f) => (
-            <Label key={f.label} x={f.x} y={560} size={28} opacity={prog(t, f.d - 0.4, 0.6)}>
+            <Label key={f.label} x={f.x} y={560} size={28} opacity={feederVis(f.d)}>
               {f.label.toUpperCase()}
             </Label>
           ))}
         </>
       }
     >
-      <g transform={`translate(0 ${mix(-160, 0, prog(t, 0.4, 0.9))})`} opacity={prog(t, 0.4, 0.7)}>
-        <Strip x={960} y={250} w={980} h={160} lines={3} seed={2} />
+      <g transform={`translate(0 ${mix(-160, 0, prog(t, 0.4, 0.9))})`} opacity={prog(t, 0.4, 0.7) * stripOut}>
+        <Strip x={960} y={250} w={980} h={160} lines={t < extractAt ? 3 : 0} seed={2} />
+      </g>
+      {/* live waveform of the radio call, until the feeders take over */}
+      <g opacity={prog(t, hearAt, 0.6) * waveOut} stroke={C.ink} strokeWidth={3} fill={C.teal}>
+        {Array.from({ length: 33 }).map((_, i) => {
+          const h = 14 + 120 * Math.abs(Math.sin(t * 9 + i * 0.7)) * (0.35 + 0.65 * Math.abs(Math.sin(i * 0.31 + t * 2.3)));
+          return <rect key={i} x={560 + i * 25} y={510 - h / 2} width={14} height={h} rx={7} />;
+        })}
       </g>
       {/* feeders */}
       {feeders.map((f, i) => {
-        const o = prog(t, f.d - 0.5, 0.6);
+        const o = feederVis(f.d);
         const fall = prog(t, f.d + 0.1, 0.8);
         return (
-          <g key={f.label} opacity={o}>
-            {i === 0 ? (
-              <path d="M500 450 l20 -30 l20 60 l20 -90 l20 90 l20 -60 l20 30" fill="none" stroke={C.teal} strokeWidth={10} strokeLinecap="round" strokeLinejoin="round" />
-            ) : null}
-            {i === 1 ? (
-              <g stroke={C.ink} strokeWidth={6}>
-                <rect x={900} y={420} width={110} height={50} rx={6} fill={C.cream} />
-                <circle cx={1000} cy={440} r={34} fill="#bdeaff" fillOpacity={0.6} />
-                <line x1={1024} y1={466} x2={1052} y2={496} strokeWidth={10} strokeLinecap="round" />
-              </g>
-            ) : null}
-            {i === 2 ? (
-              <g stroke={C.ink} strokeWidth={6} strokeLinejoin="round">
-                <rect x={1290} y={420} width={150} height={60} fill={C.panel} />
-                <rect x={1380} y={380} width={22} height={60} fill={C.panel} />
-                <circle cx={1391} cy={376} r={14} fill={C.gold} />
-              </g>
-            ) : null}
+          <g key={f.label}>
+            <g opacity={o}>
+              {i === 0 ? (
+                <path d="M500 450 l20 -30 l20 60 l20 -90 l20 90 l20 -60 l20 30" fill="none" stroke={C.teal} strokeWidth={10} strokeLinecap="round" strokeLinejoin="round" />
+              ) : null}
+              {i === 1 ? (
+                <g stroke={C.ink} strokeWidth={6}>
+                  <rect x={900} y={420} width={110} height={50} rx={6} fill={C.cream} />
+                  <circle cx={1000} cy={440} r={34} fill="#bdeaff" fillOpacity={0.6} />
+                  <line x1={1024} y1={466} x2={1052} y2={496} strokeWidth={10} strokeLinecap="round" />
+                </g>
+              ) : null}
+              {i === 2 ? (
+                <g stroke={C.ink} strokeWidth={6} strokeLinejoin="round">
+                  <rect x={1290} y={420} width={150} height={60} fill={C.panel} />
+                  <rect x={1380} y={380} width={22} height={60} fill={C.panel} />
+                  <circle cx={1391} cy={376} r={14} fill={C.gold} />
+                </g>
+              ) : null}
+            </g>
             <circle cx={mix(f.x, gx, fall)} cy={mix(500, gy - 30, fall * fall)} r={18} fill={C.gold} stroke={C.ink} strokeWidth={5} opacity={fall > 0 && fall < 1 ? 1 : 0} />
           </g>
         );
       })}
       {/* gauge */}
-      <g opacity={prog(t, 0.9, 0.8)}>
+      <g opacity={prog(t, confAt + 0.4, 0.7)}>
         <path d={`M${gx - 230} ${gy} A230 230 0 0 1 ${gx + 230} ${gy}`} fill="none" stroke={C.ink} strokeWidth={46} strokeLinecap="round" />
         <path d={`M${gx - 230} ${gy} A230 230 0 0 1 ${gx + 230} ${gy}`} fill="none" stroke={C.cream} strokeWidth={34} strokeLinecap="round" />
         <path d={`M${gx - 230} ${gy} A230 230 0 0 1 ${gx + 230} ${gy}`} fill="none" stroke={C.teal} strokeWidth={34} strokeLinecap="round" pathLength={1} strokeDasharray={`${Math.min(0.94, conf)} 2`} />
@@ -336,7 +406,7 @@ export const S7: React.FC = () => {
     { x: 960, name: "GATES", w: 3, score: "", at: 0 },
     { x: 1220, name: "RAMP", w: 3, score: "", at: 0 },
     { x: 1480, name: "CREW", w: 12, score: "0.41", at: when(5, "Runners-up") },
-    { x: 1740, name: "CONNECTIONS", w: 8, score: "0.34", at: when(5, "Other desks") },
+    { x: 1740, name: "CONNECTIONS", w: 8, score: "0.34", at: when(5, "Other areas") },
   ];
   const shoot = when(5, "Hydraulic");
   const zoom = mix(1, 1.06, seg(t, 0, endOf(5)));

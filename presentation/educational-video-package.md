@@ -48,7 +48,7 @@ Count and pace are in D.2. Scene numbers match the storyboard.
 
 **6.** "Probably thirty to forty minutes" becomes a working number: thirty-five, the midpoint. But the original words stay untouched, because later, someone will want to see exactly what was said.
 
-**7.** Step two: who owns this? Five desks could: flight operations, gates, ramp, crew, customer connections. "Hydraulic" and "delay" point to flight operations, at ninety-two percent. Crew trails at forty-one, connections at thirty-four. The runners-up are kept, so you can see how close the call was.
+**7.** Step two: who owns this? Five areas or teams could: flight operations, gates, ramp, crew, customer connections. "Hydraulic" and "delay" point to flight operations, at ninety-two percent. Crew trails at forty-one, connections at thirty-four. The runners-up are kept, so you can see how close the call was.
 
 **8.** And it keeps the receipt: the sentence that justified the routing, quoted word for word from the transcript. Nobody has to take the routing on trust. They can read it.
 

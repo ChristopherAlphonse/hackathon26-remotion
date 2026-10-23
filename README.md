@@ -6,9 +6,9 @@ A narrated, animated explainer built with [Remotion](https://www.remotion.dev/).
     <img src="cover.png">
 </p>
 
-- 1920x1080 at 24 fps, about 5 minutes 46 seconds (346 s): a 7 s "Runway Rebels presents" intro, 13 narrated scenes (S1 to S16), the screen recording of the demo (`public/demo/video1.mp4`, about 130 s, with its own audio), then three closing scenes (S17 value, S18 rollout, S19 conclusion, about 1 minute). Narration is split into `ACT1` (13 scenes) and act 2 (3 scenes) in `timing.ts`.
+- 1920x1080 at 24 fps, about 5 minutes 59 seconds (358.8 s): a 7 s "Runway Rebels presents" intro, 13 narrated scenes (S1 to S16), the screen recording of the demo (`public/demo/video1.mp4`, about 130 s, with its own audio), then three closing scenes (S17 value, S18 rollout, S19 conclusion, about 1 minute). Narration is split into `ACT1` (13 scenes) and act 2 (3 scenes) in `timing.ts`.
 - One composition, `TwoClocks` (`src/Root.tsx`).
-- Narration is generated with ElevenLabs (voice: Matilda). The music bed and intro sound effect are in the repo, so you only need an ElevenLabs key if you change the narration.
+- Narration is generated with ElevenLabs (eleven_v4 model; scenes 1 to 13 use the cloned voice "christopher alphonse", the closing scenes 14 to 16 after the demo use voice `wqPxhqgBjy3XEcKc6PJp`). The music bed and intro sound effect are in the repo, so you only need an ElevenLabs key if you change the narration.
 
 ## Setup
 
@@ -62,10 +62,11 @@ Everything is driven by `src/TwoClocks/timing.ts`. Scene starts and narration la
 Needs an ElevenLabs key and macOS (`afconvert` is used to make the WAV files).
 
 1. Put `ELEVENLABS_API_KEY=...` in `.env.local` (see `.env.example`). `.env.local` is gitignored.
-2. Run the command that matches the current narration (model `eleven_v3`, tag `[upbeat]`):
+2. Run the command that matches the current narration (model `eleven_v4`, cloned voice):
 
 ```console
-npx tsx --env-file=.env.local scripts/generate-narration.mts --model eleven_v3 --tag "[upbeat]"
+npx tsx --env-file=.env.local scripts/generate-narration.mts --voice pvS1ZIJpQEGNG9v2Ixl9 --model eleven_v4 --scenes 1,2,3,4,5,6,7,8,9,10,11,12,13
+npx tsx --env-file=.env.local scripts/generate-narration.mts --voice wqPxhqgBjy3XEcKc6PJp --model eleven_v4 --scenes 14,15,16
 ```
 
 The script's own defaults differ: with no flags it uses `eleven_multilingual_v2` and no tag, so the result will not match the shipped narration.
@@ -76,6 +77,7 @@ Options:
 |---|---|---|
 | `--scenes 1,2,3` | all | Redo only these scenes |
 | `--out DIR` | `public/twoclocks` | Output folder |
+| `--voice ID` | Matilda (`XrExE9yKIg1WjnnlVkGX`) | `pvS1ZIJpQEGNG9v2Ixl9` is the cloned "christopher alphonse" voice |
 | `--model ID` | `eleven_multilingual_v2` | `eleven_v3` skips previous/next text stitching |
 | `--tag "[upbeat]"` | none | Audio tag, `eleven_v3` and `eleven_v4` only. Older models read it aloud |
 | `--stability N` | `0.35` | Voice stability |

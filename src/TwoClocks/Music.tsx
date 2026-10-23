@@ -3,6 +3,7 @@ import { Audio, interpolate, Sequence, staticFile } from "remotion";
 import {
   ACT1,
   ACT1_SEC,
+  CREDITS_SEC,
   FPS,
   LEAD,
   MUSIC1,
@@ -21,7 +22,7 @@ import {
 const UNDER_VOICE = 0.06; // about 14 dB below the narrator
 const IN_GAP = 0.3; // between lines the music comes up
 const HIT = 0.8; // the drop into scene 2
-const FULL = 0.6; // the finale, after the last line
+const FULL = 0.6; // the finale: after the last line, through the credits
 
 const XF = 2; // crossfade between music segments, in frames
 
@@ -51,7 +52,7 @@ const pointsFor = (first: number, last: number, drop: number, endSec: number): [
 };
 
 const POINTS1 = pointsFor(0, ACT1 - 1, 1, ACT1_SEC);
-const POINTS2 = pointsFor(ACT1, NARR.length - 1, ACT1, TOTAL_SEC);
+const POINTS2 = pointsFor(ACT1, NARR.length - 1, ACT1, TOTAL_SEC + CREDITS_SEC);
 
 const gainAt = (points: [number, number][], frame: number): number => {
   const t = frame / FPS;

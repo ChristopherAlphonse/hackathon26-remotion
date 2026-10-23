@@ -57,12 +57,21 @@ export const S11: React.FC = () => {
   // the card climbs while "This one: ninety-two" is said and lands on 0.92 as the number finishes
   const cross = when(8, "ninety-two") + 0.1;
   const rise = seg(t, when(8, "This one") - 0.2, cross);
-  const open = seg(t, cross, cross + 0.45);
+  // first a routine bag-count update rides up, clears the bar and applies itself (then steps aside), so the delay is the contrast
+  const bagAt = when(8, "bag count");
+  const appliesAt = when(8, "applies itself");
+  const belowAt = when(8, "Below");
+  const bagIn = prog(t, bagAt - 0.7, 0.5);
+  const bagRise = seg(t, bagAt - 0.4, appliesAt);
+  const bagOut = seg(t, belowAt - 0.1, belowAt + 0.4);
+  const bagVis = bagIn * (1 - bagOut);
+  const open = Math.max(seg(t, cross, cross + 0.45), seg(t, appliesAt + 0.1, appliesAt + 0.5) * (1 - bagOut));
   const barTop = 200;
   const barBot = 880;
   const yAt = (v: number) => barBot - (barBot - barTop) * v;
   const cardY = mix(yAt(0.1), yAt(0.92), rise);
   const rule = prog(t, when(8, "Seventy-five"), 0.8);
+  const bagY = mix(yAt(0.3), yAt(0.9), bagRise);
   // the second lock (a critical decision) comes in as "the second lock" is said, and rattles shut on "stays shut"
   const secondAt = when(8, "the second lock");
   const shutAt = when(8, "stays shut");
@@ -78,7 +87,13 @@ export const S11: React.FC = () => {
           <Label x={560} y={yAt(0.75) + 46} size={24} fill={C.cream} opacity={rule}>
             BELOW: ASKS A PERSON
           </Label>
-          <Label x={520} y={cardY + 12} size={34} fill={C.ink} weight={900} opacity={rise}>
+          <Label x={520} y={bagY - 12} size={22} fill={C.ink} weight={900} opacity={bagVis}>
+            BAG COUNT +2
+          </Label>
+          <Label x={520} y={bagY + 30} size={34} fill={C.ink} weight={900} opacity={bagVis * bagRise}>
+            0.90
+          </Label>
+          <Label x={520} y={cardY + 16} size={44} fill={C.ink} weight={900} opacity={rise}>
             0.92
           </Label>
           <Label x={1080} y={474} size={26} fill={C.cream}>
@@ -96,8 +111,12 @@ export const S11: React.FC = () => {
       {/* scale */}
       <rect x={260} y={barTop} width={34} height={barBot - barTop} rx={17} fill={C.panel} stroke={C.ink} strokeWidth={7} />
       <line x1={280} y1={yAt(0.75)} x2={860} y2={yAt(0.75)} stroke={C.gold} strokeWidth={7} strokeDasharray="22 14" />
+      {/* the routine card: clears the bar, applies itself */}
+      <g transform={`translate(520 ${bagY})`} opacity={bagVis}>
+        <rect x={-130} y={-48} width={260} height={96} rx={12} fill={C.cream} stroke={C.green} strokeWidth={9} />
+      </g>
       {/* the command card */}
-      <g transform={`translate(520 ${cardY})`}>
+      <g transform={`translate(520 ${cardY})`} opacity={prog(t, when(8, "This one") - 0.6, 0.4)}>
         <rect x={-130} y={-48} width={260} height={96} rx={12} fill={C.cream} stroke={C.gold} strokeWidth={9} />
       </g>
       {/* the locks: confidence clears the bar, but a critical decision is a second lock */}
@@ -113,12 +132,14 @@ export const S11: React.FC = () => {
 // ---------- 12 · Human in the loop: the voice is a witness, a person takes the bench ----------
 export const S12: React.FC = () => {
   const t = useT();
-  const title = prog(t, when(9, "human in the loop") - 0.3, 0.8);
+  // the person in the loop: shown, not captioned. They appear inside a ring, and each trigger sends its flag to them
+  const personAt = when(9, "human in the loop");
+  const person = prog(t, personAt - 0.3, 0.8) * (1 - seg(t, when(9, "The voice") - 0.3, when(9, "The voice") + 0.3));
+  const lookDir = t < when(9, "critical") - 0.2 ? -1 : 1;
   const lowAt = when(9, "too low");
   const critAt = when(9, "critical");
   const witAt = when(9, "The voice");
   const testAt = when(9, "it testifies");
-  const ruleAt = when(9, "it doesn't rule");
   const benchAt = when(9, "takes the bench");
   const low = prog(t, lowAt - 0.4, 0.7);
   const crit = prog(t, critAt - 0.4, 0.7);
@@ -159,16 +180,21 @@ export const S12: React.FC = () => {
           <Label x={JX} y={930} size={30} fill={C.gold} weight={900} opacity={sit}>
             JUDGE: A PERSON
           </Label>
-          <Label x={960} y={1030} size={34} fill={C.cream} weight={900} opacity={prog(t, ruleAt - 0.2, 0.7)}>
-            WITNESS, NOT JUDGE
-          </Label>
         </>
       }
     >
-      <g opacity={title * (1 - out)}>
-        <Hand x={960} y={190} size={120} fill={C.gold}>
-          human in the loop
-        </Hand>
+      {/* the human in the loop: a person inside a turning ring, both triggers feed them */}
+      <g opacity={person}>
+        <circle cx={960} cy={470} r={165} fill="none" stroke={C.gold} strokeWidth={6} strokeDasharray="16 16" transform={`rotate(${t * 18} 960 470)`} />
+        <Bust x={960} y={470} s={0.95} skin={C.skinC} shirt="#5a6aa8" kind="controller" look={lookDir} />
+      </g>
+      <g stroke={C.gold} strokeWidth={7} strokeLinecap="round" strokeLinejoin="round" fill="none">
+        <g opacity={low * (1 - out)}>
+          <path d="M748 470 L792 470 M776 454 L792 470 L776 486" strokeDasharray={low < 1 ? "10 10" : undefined} />
+        </g>
+        <g opacity={crit * (1 - out)}>
+          <path d="M1172 470 L1128 470 M1144 454 L1128 470 L1144 486" strokeDasharray={crit < 1 ? "10 10" : undefined} />
+        </g>
       </g>
       {/* trigger 1: confidence too low */}
       <g opacity={low * (1 - out)}>

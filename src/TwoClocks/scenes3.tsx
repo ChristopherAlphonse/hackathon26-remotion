@@ -1,5 +1,5 @@
 import React from "react";
-import { Art, Bust, C, Clock, Hand, Label, Ribbon, Strip, Tick, handsFor, mix, prog, seg, useT } from "./art";
+import { Art, Bust, BoardingPass, C, Clock, CrewBadge, GateSign, Hand, Label, Plane, Ribbon, Strip, Tick, handsFor, mix, prog, seg, useT } from "./art";
 import { endOf, when } from "./timing";
 
 // Scenes after the demo (video1): the value (index 13), the rollout plan (14) and the conclusion (15).
@@ -9,43 +9,57 @@ import { endOf, when } from "./timing";
 export const S17: React.FC = () => {
   const t = useT();
   const title = prog(t, when(13, "What is earlier") - 0.1, 0.8);
-  // The impact leads. The numbers land as they are spoken; the calculation is a quiet line that only appears after them.
+  // Three beats, one idea on screen at a time: (1) the two numbers, (2) where they come from: the flights, the ones that matter, caught sooner,
+  // (3) the places the time comes back. The calculation is not drawn: it was telling, not showing.
   const aFrom = when(13, "two hundred");
   const aTo = when(13, "aircraft minutes") + 0.3;
   const bFrom = when(13, "roughly");
   const bTo = when(13, "dollars") + 0.5;
   const pA = seg(t, aFrom, aTo);
   const pB = seg(t, bFrom, bTo);
-  const cardA = prog(t, aFrom - 0.5, 0.7);
-  const cardB = prog(t, bFrom - 0.5, 0.7);
-  const calc = prog(t, when(13, "It starts with"), 0.9);
-  const tagsHead = prog(t, when(13, "That time can come") - 0.1, 0.6);
-  // each tag lands on the word that names it
-  const tags: { s: string; at: number }[][] = [
-    [
-      { s: "Maintenance delays", at: when(13, "maintenance") - 0.1 },
-      { s: "Turn delays", at: when(13, "turns") - 0.1 },
-      { s: "Fueling · cleaning · bags · pushback", at: when(13, "turns") + 0.25 },
-      { s: "Gate conflicts", at: when(13, "gates") - 0.1 },
-    ],
-    [
-      { s: "Crew impacts", at: when(13, "crews") - 0.1 },
-      { s: "Misconnect risk", at: when(13, "connections") - 0.1 },
-      { s: "IROPs coordination", at: when(13, "connections") + 0.3 },
-    ],
-  ];
-  const tagW = (s: string) => s.length * 12.5 + 44;
-  const tagItems = tags.flatMap((row, r) => {
-    const total = row.reduce((a, g) => a + tagW(g.s), 0) + (row.length - 1) * 24;
-    let x = 960 - total / 2;
-    return row.map((g) => {
-      const w = tagW(g.s);
-      const item = { s: g.s, x, w, y: 800 + r * 54, o: prog(t, g.at, 0.5) };
-      x += w + 24;
-      return item;
-    });
-  });
-  const note = prog(t, bTo, 0.8);
+  const beat2 = when(13, "It starts with");
+  const beat3 = when(13, "That time can come");
+  const cardsOut = prog(t, beat2 - 0.3, 0.6);
+  const cardA = prog(t, aFrom - 0.5, 0.7) * (1 - cardsOut);
+  const cardB = prog(t, bFrom - 0.5, 0.7) * (1 - cardsOut);
+  const DY = 150; // result cards sit lower, centred in the frame
+  const note = prog(t, bTo, 0.8) * (1 - prog(t, beat2 - 0.3, 0.6)); // the asterisk belongs to the cards
+  // beat 2: a fleet of planes, the few that matter, caught sooner
+  const COLS = 10;
+  const ROWS = 4;
+  const MATTER = [3, 8, 14, 21, 26, 35];
+  const fleetFrom = when(13, "five thousand");
+  const fleetOut = prog(t, beat3 - 0.3, 0.6);
+  const fleet = (i: number) => prog(t, fleetFrom + (i / (COLS * ROWS)) * 1.4, 0.5) * (1 - fleetOut);
+  const matter = prog(t, when(13, "voice events"), 0.5);
+  const back = prog(t, when(13, "real time"), 0.5);
+  const fx = (i: number) => 960 + ((i % COLS) - (COLS - 1) / 2) * 160 - 39;
+  const fy = (i: number) => 330 + Math.floor(i / COLS) * 105;
+  // beat 3: where the time comes back, each icon lands on the word that names it
+  const sources = [
+    { s: "MAINTENANCE", at: when(13, "maintenance") - 0.1, icon: "wrench" },
+    { s: "TURNS", at: when(13, "turns") - 0.1, icon: "plane" },
+    { s: "GATES", at: when(13, "gates") - 0.1, icon: "gate" },
+    { s: "CREWS", at: when(13, "crews") - 0.1, icon: "crew" },
+    { s: "CONNECTIONS", at: when(13, "connections") - 0.1, icon: "pass" },
+  ].map((g, i) => ({ ...g, cx: 960 + (i - 2) * 340, o: prog(t, g.at, 0.5) }));
+  const icon = (g: (typeof sources)[number]) => {
+    const y = 470;
+    if (g.icon === "wrench")
+      return (
+        <g transform={`translate(${g.cx} ${y})`} stroke={C.ink} strokeWidth={5} strokeLinejoin="round">
+          <g transform="rotate(-40)">
+            <rect x={-14} y={-20} width={28} height={110} rx={10} fill={C.muted} />
+            <circle cx={0} cy={-34} r={36} fill={C.muted} />
+            <rect x={-14} y={-80} width={28} height={40} fill={C.panel} stroke="none" />
+          </g>
+        </g>
+      );
+    if (g.icon === "plane") return <Plane x={g.cx - 107} y={y - 30} s={0.3} />;
+    if (g.icon === "gate") return <GateSign x={g.cx} y={y - 20} s={1.5} />;
+    if (g.icon === "crew") return <CrewBadge x={g.cx} y={y} s={1.3} />;
+    return <BoardingPass x={g.cx} y={y} s={1.3} rot={-6} />;
+  };
   return (
     <Art
       overlay={
@@ -54,36 +68,29 @@ export const S17: React.FC = () => {
             Earlier awareness = operational value
           </Hand>
           <g opacity={cardA}>
-            <Label x={500} y={392} size={150} fill={C.gold} weight={900} spacing={-2} opacity={pA > 0 ? 1 : 0}>
+            <Label x={500} y={414 + DY} size={150} fill={C.gold} weight={900} spacing={-2} opacity={pA > 0 ? 1 : 0}>
               {`~${Math.round(219 * pA)}K`}
             </Label>
-            <Label x={500} y={460} size={26} fill={C.cream}>
+            <Label x={500} y={486 + DY} size={26} fill={C.cream}>
               AIRCRAFT MINUTES RECOVERED PER YEAR*
             </Label>
-            <Label x={500} y={512} size={30} fill={C.muted} weight={500} spacing={0.5}>
+            <Label x={500} y={540 + DY} size={30} fill={C.muted} weight={500} spacing={0.5}>
               ≈ 3,650 aircraft hours
             </Label>
           </g>
           <g opacity={cardB}>
-            <Label x={1420} y={392} size={150} fill={C.gold} weight={900} spacing={-2} opacity={pB > 0 ? 1 : 0}>
+            <Label x={1420} y={414 + DY} size={150} fill={C.gold} weight={900} spacing={-2} opacity={pB > 0 ? 1 : 0}>
               {`~$${(21.6 * pB).toFixed(1)}M`}
             </Label>
-            <Label x={1420} y={460} size={26} fill={C.cream}>
+            <Label x={1420} y={486 + DY} size={26} fill={C.cream}>
               GROSS ANNUAL OPERATING-COST OPPORTUNITY*
             </Label>
-            <Label x={1420} y={512} size={30} fill={C.muted} weight={500} spacing={0.5}>
+            <Label x={1420} y={540 + DY} size={30} fill={C.muted} weight={500} spacing={0.5}>
               at $98.41 per aircraft block minute
             </Label>
           </g>
-          {/* the calculation: one small muted line, never on screen without the results above it */}
-          <Label x={960} y={622} size={24} fill={C.muted} weight={500} spacing={0.3} opacity={calc * 0.85}>
-            5,000 flights/day × 365 days × 10% × 6 min × 20% = 219K min → × $98.41 = $21.6M
-          </Label>
-          <Label x={960} y={742} size={22} fill={C.muted} opacity={tagsHead}>
-            WHERE THE TIME CAN COME FROM
-          </Label>
-          {tagItems.map((g) => (
-            <Label key={g.s} x={g.x + g.w / 2} y={g.y + 8} size={22} fill={C.cream} weight={700} spacing={0.3} opacity={g.o}>
+          {sources.map((g) => (
+            <Label key={g.s} x={g.cx} y={640} size={30} fill={C.cream} opacity={g.o}>
               {g.s}
             </Label>
           ))}
@@ -97,14 +104,29 @@ export const S17: React.FC = () => {
     >
       {/* the two results */}
       <g opacity={cardA} transform={`translate(0 ${mix(30, 0, cardA)})`}>
-        <rect x={100} y={262} width={800} height={290} rx={22} fill={C.panel} stroke={C.gold} strokeWidth={9} />
+        <rect x={60} y={238 + DY} width={880} height={346} rx={22} fill={C.panel} stroke={C.gold} strokeWidth={9} />
       </g>
       <g opacity={cardB} transform={`translate(0 ${mix(30, 0, cardB)})`}>
-        <rect x={1020} y={262} width={800} height={290} rx={22} fill={C.panel} stroke={C.gold} strokeWidth={9} />
+        <rect x={980} y={238 + DY} width={880} height={346} rx={22} fill={C.panel} stroke={C.gold} strokeWidth={9} />
       </g>
-      {/* where the time can come from */}
-      {tagItems.map((g) => (
-        <rect key={g.s} x={g.x} y={g.y - 20} width={g.w} height={40} rx={20} fill={C.panel} stroke={C.teal} strokeWidth={4} opacity={g.o} />
+      {/* the fleet: most flights are fine, a few voice events matter, caught sooner */}
+      {Array.from({ length: COLS * ROWS }).map((_, i) => {
+        const hit = MATTER.includes(i);
+        return (
+          <g key={i} opacity={fleet(i) * (hit ? 1 : mix(1, 0.3, matter))}>
+            {hit && matter > 0 && (
+              <rect x={fx(i) - 18} y={fy(i) - 22} width={114} height={62} rx={14} fill="none" stroke={C.gold} strokeWidth={5} opacity={matter} />
+            )}
+            <Plane x={fx(i)} y={fy(i)} s={0.11} />
+            {hit && back > 0 && <Tick x={fx(i) + 78} y={fy(i) - 34} s={0.6 * back} />}
+          </g>
+        );
+      })}
+      {/* where the time comes back */}
+      {sources.map((g) => (
+        <g key={g.s} opacity={g.o} transform={`translate(0 ${mix(24, 0, g.o)})`}>
+          {icon(g)}
+        </g>
       ))}
     </Art>
   );
@@ -112,57 +134,19 @@ export const S17: React.FC = () => {
 
 // ---------- 18 · The rollout plan ----------
 const STEPS = [
-  {
-    n: "1",
-    name: "SHADOW",
-    tag: "Listen and measure",
-    cue: "Shadow:",
-    lines: [
-      ["One core station", C.cream],
-      ["Listens to ramp radio calls", C.cream],
-      ["NO operational writes", "#ff7a73"],
-      ["Measure accuracy + minutes", C.cream],
-    ],
-    foot: ["Baselines: accuracy, routing,", "false positives, minutes gained"],
-  },
-  {
-    n: "2",
-    name: "ASSIST",
-    tag: "Proposals for people",
-    cue: "Assist:",
-    lines: [
-      ["Voice → state → proposal", C.cream],
-      ["Inside existing workflows", C.cream],
-      ["A human approves every change", "#7ee2a0"],
-    ],
-    foot: ["Track: acceptance rate,", "latency, minutes recovered"],
-  },
+  { n: "1", name: "SHADOW", tag: "Listen and measure", cue: "Shadow:", lines: [["No writes", "#ff7a73"]] },
+  { n: "2", name: "ASSIST", tag: "Proposals for people", cue: "Assist:", lines: [["A human approves", "#7ee2a0"]] },
   {
     n: "3",
     name: "CONTROLLED AUTOMATION",
     tag: "Only what is proven",
     cue: "Controlled automation:",
     lines: [
-      ["AUTO: fueling · cleaning ·", "#7ee2a0"],
-      ["boarding · conflict alerts", C.cream],
-      ["HUMAN: flight status/ETD,", C.gold],
-      ["aircraft, crew, gate", C.cream],
+      ["Low-risk only", "#7ee2a0"],
+      ["Humans keep the rest", C.gold],
     ],
-    foot: ["Only proven, low-risk", "workflows go automatic"],
   },
-  {
-    n: "4",
-    name: "NETWORK SCALE",
-    tag: "Wave by wave",
-    cue: "Then network scale",
-    lines: [
-      ["Core stations first", C.cream],
-      ["Waves: Flight · Ramp · Gate", C.cream],
-      ["· Crew · Customer / IROPs", C.cream],
-      ["Built on Southwest's systems", C.cream],
-    ],
-    foot: ["Year-end 2025: 803 aircraft,", "117 destinations"],
-  },
+  { n: "4", name: "NETWORK SCALE", tag: "Wave by wave", cue: "Then network scale", lines: [["On Southwest's systems", C.cream]] },
 ] as const;
 
 const CARD_W = 420;
@@ -179,8 +163,7 @@ export const S18: React.FC = () => {
   // the marker on the trust track moves from step to step as each one is spoken
   let mx = CARD_CX(0);
   for (let i = 1; i < STEPS.length; i++) mx = mix(mx, CARD_CX(i), seg(t, cues[i] - 0.1, cues[i] + 0.7));
-  const proof = prog(t, cues[2] + 1.2, 0.8);
-  const earn = prog(t, when(14, "each one earning"), 0.7);
+    const earn = prog(t, when(14, "each one earning"), 0.7);
   const swing = prog(t, cues[2], 1.2);
   const pulse = ((t * 0.8) % 1);
   return (
@@ -192,22 +175,16 @@ export const S18: React.FC = () => {
           </Hand>
           {STEPS.map((s, i) => {
             const o = reveal(i);
-            const left = CARD_X(i);
-            return (
+                        return (
               <g key={s.name}>
-                <Label x={CARD_CX(i)} y={286} size={26} fill={active(i) ? C.gold : C.cream} weight={900} spacing={0.5} opacity={shell(i)}>
+                <Label x={CARD_CX(i)} y={286} size={24} fill={active(i) ? C.gold : C.cream} weight={900} spacing={0.5} opacity={shell(i)}>
                   {s.name}
                 </Label>
-                <Hand x={CARD_CX(i)} y={500} size={50} fill={C.teal} opacity={o}>
+                <Hand x={CARD_CX(i)} y={540} size={50} fill={C.teal} opacity={o}>
                   {s.tag}
                 </Hand>
                 {s.lines.map(([text, color], k) => (
-                  <Label key={text} x={left + 30} y={556 + k * 36} size={21} fill={color} weight={700} spacing={0.2} anchor="start" opacity={prog(t, cues[i] + 0.3 + k * 0.35, 0.5)}>
-                    {text}
-                  </Label>
-                ))}
-                {s.foot.map((text, k) => (
-                  <Label key={text} x={CARD_CX(i)} y={782 + k * 27} size={19} fill={C.gold} weight={700} spacing={0.2} opacity={prog(t, cues[i] + 1.8, 0.6)}>
+                  <Label key={text} x={CARD_CX(i)} y={612 + k * 44} size={30} fill={color} weight={700} spacing={0.2} opacity={prog(t, cues[i] + 0.3 + k * 0.35, 0.5)}>
                     {text}
                   </Label>
                 ))}
@@ -220,17 +197,8 @@ export const S18: React.FC = () => {
               {s.n}
             </Label>
           ))}
-          <Label x={100} y={958} size={20} fill={C.muted} anchor="start" opacity={earn}>
-            LISTEN ONLY
-          </Label>
-          <Label x={960} y={958} size={22} fill={C.cream} opacity={earn}>
+          <Label x={960} y={885} size={24} fill={C.cream} opacity={earn}>
             TRUST IS EARNED STEP BY STEP
-          </Label>
-          <Label x={1820} y={958} size={20} fill={C.muted} anchor="end" opacity={earn}>
-            ACTS AT NETWORK SCALE
-          </Label>
-          <Label x={960} y={1020} size={24} fill={C.cream} weight={500} spacing={0.3} opacity={proof}>
-            Every action keeps: evidence · confidence · before/after state · provenance · audit history
           </Label>
         </>
       }
@@ -241,9 +209,8 @@ export const S18: React.FC = () => {
         const on = active(i);
         return (
           <g key={s.name} opacity={o} transform={`translate(0 ${mix(26, 0, o)})`}>
-            <rect x={CARD_X(i)} y={215} width={CARD_W} height={610} rx={22} fill={C.panel} stroke={on ? C.gold : C.ink} strokeWidth={on ? 10 : 7} />
+            <rect x={CARD_X(i)} y={215} width={CARD_W} height={520} rx={22} fill={C.panel} stroke={on ? C.gold : C.ink} strokeWidth={on ? 10 : 7} />
             <circle cx={CARD_X(i) + 6} cy={236} r={28} fill={C.gold} stroke={C.ink} strokeWidth={6} />
-            <line x1={CARD_X(i) + 30} x2={CARD_X(i) + CARD_W - 30} y1={735} y2={735} stroke={C.ink} strokeWidth={4} strokeOpacity={0.6} />
             {/* icons */}
             <g opacity={reveal(i)}>
               {i === 0 ? (
@@ -254,18 +221,18 @@ export const S18: React.FC = () => {
               ) : null}
               {i === 1 ? (
                 <g>
-                  <Bust x={cx - 20} y={338} s={0.6} skin={C.skinC} shirt="#5a6aa8" kind="controller" look={0} />
-                  <Tick x={cx + 88} y={350} s={1} p={prog(t, cues[1] + 1.0, 0.5)} />
+                  <Bust x={cx - 20} y={366} s={0.6} skin={C.skinC} shirt="#5a6aa8" kind="controller" look={0} />
+                  <Tick x={cx + 88} y={378} s={1} p={prog(t, cues[1] + 1.0, 0.5)} />
                 </g>
               ) : null}
               {i === 2 ? (
                 <g>
-                  <circle cx={cx} cy={390} r={78} fill={C.panel} stroke={C.cream} strokeWidth={8} />
+                  <circle cx={cx} cy={398} r={68} fill={C.panel} stroke={C.cream} strokeWidth={8} />
                   {Array.from({ length: 9 }).map((_, k) => (
-                    <line key={k} x1={0} y1={-62} x2={0} y2={-50} stroke={C.cream} strokeWidth={5} strokeLinecap="round" transform={`translate(${cx} 390) rotate(${-100 + k * 25})`} />
+                    <line key={k} x1={0} y1={-54} x2={0} y2={-43} stroke={C.cream} strokeWidth={5} strokeLinecap="round" transform={`translate(${cx} 398) rotate(${-100 + k * 25})`} />
                   ))}
-                  <line x1={cx} y1={390} x2={cx} y2={332} stroke={C.gold} strokeWidth={9} strokeLinecap="round" transform={`rotate(${mix(-95, -35, swing)} ${cx} 390)`} />
-                  <circle cx={cx} cy={390} r={10} fill={C.gold} stroke={C.ink} strokeWidth={4} />
+                  <line x1={cx} y1={398} x2={cx} y2={348} stroke={C.gold} strokeWidth={9} strokeLinecap="round" transform={`rotate(${mix(-95, -35, swing)} ${cx} 398)`} />
+                  <circle cx={cx} cy={398} r={10} fill={C.gold} stroke={C.ink} strokeWidth={4} />
                 </g>
               ) : null}
               {i === 3 ? (
@@ -291,12 +258,12 @@ export const S18: React.FC = () => {
       })}
       {/* the trust track along the bottom */}
       <g opacity={earn}>
-        <path d="M100 905 L1800 905" stroke={C.cream} strokeWidth={7} strokeLinecap="round" />
-        <path d="M1776 884 L1810 905 L1776 926" fill="none" stroke={C.cream} strokeWidth={7} strokeLinecap="round" strokeLinejoin="round" />
+        <path d="M100 815 L1800 815" stroke={C.cream} strokeWidth={7} strokeLinecap="round" />
+        <path d="M1776 794 L1810 815 L1776 836" fill="none" stroke={C.cream} strokeWidth={7} strokeLinecap="round" strokeLinejoin="round" />
         {STEPS.map((s, i) => (
-          <circle key={s.n} cx={CARD_CX(i)} cy={905} r={13} fill={C.panel} stroke={C.cream} strokeWidth={5} />
+          <circle key={s.n} cx={CARD_CX(i)} cy={815} r={13} fill={C.panel} stroke={C.cream} strokeWidth={5} />
         ))}
-        <circle cx={mx} cy={905} r={22} fill={C.gold} stroke={C.ink} strokeWidth={6} />
+        <circle cx={mx} cy={815} r={22} fill={C.gold} stroke={C.ink} strokeWidth={6} />
       </g>
     </Art>
   );
@@ -315,7 +282,7 @@ export const S19: React.FC = () => {
   const titleAt = endOf(15) + 0.2;
 
   const clocksIn = prog(t, knows - 0.2, 0.9);
-  const gap = prog(t, waits, 0.7) * (1 - seg(t, everyDesk + 0.4, same + 0.3));
+  const gap = prog(t, waits, 0.7) * (1 - seg(t, listen - 0.2, listen + 0.4));
   const wob = Math.sin(t * 5) * 5;
   const ribbon = seg(t, listen, evidence + 0.4);
   const tag = prog(t, evidence, 0.8);
