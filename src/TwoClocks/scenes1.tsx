@@ -39,7 +39,7 @@ const HydraulicActuator: React.FC<{ x: number; y: number; t: number; at: number 
   );
   return (
     <g transform={`translate(${x} ${y}) scale(${pop})`} opacity={pop}>
-      <rect x={-260} y={-115} width={520} height={215} rx={22} fill={C.panel} stroke={C.ink} strokeWidth={6} />
+      <rect x={-210} y={-115} width={420} height={170} rx={22} fill={C.panel} stroke={C.ink} strokeWidth={6} />
       {hose("M-110 -32 V-80 H-175")}
       {hose("M10 -32 V-80 H75")}
       <circle cx={mix(-110, -175, flow)} cy={flow < 0.5 ? mix(-32, -80, flow * 2) : -80} r={5} fill={C.cream} />
@@ -69,9 +69,9 @@ export const S1: React.FC = () => {
   const p = prog(t, said - 0.1, 1.6);
   const talk = t > said - 0.4 && t < said + 0.5 ? 1 : 0;
   const ribbon = "M1345 640 C1440 560 1500 420 1600 470 C1700 520 1700 640 1780 600 C1860 560 1880 700 1800 770";
-  // arrow: starts at the bottom of the hydraulic card (screen 860,395), drawn in plane coordinates so it zooms with the plane
+  // arrow: starts at the bottom of the hydraulic card (screen 860,350), drawn in plane coordinates so it zooms with the plane
   const arrow = prog(t, said + 0.1, 0.5);
-  const start = { x: 1330 + (860 - 1330) / zoom, y: 650 + (395 - 650) / zoom };
+  const start = { x: 1330 + (860 - 1330) / zoom, y: 650 + (350 - 650) / zoom };
   const tgt = { x: 770, y: 740 };
   const R = 125;
   const dx = tgt.x - start.x, dy = tgt.y - start.y, dist = Math.hypot(dx, dy);
@@ -86,15 +86,6 @@ export const S1: React.FC = () => {
             <rect x={110} y={84} width={330} height={64} rx={12} fill={C.cream} />
             <Label x={275} y={128} size={30} fill={C.ink}>
               SCHEDULED 15:40
-            </Label>
-          </g>
-          {/* plain-language caption inside the hydraulic card (card centre is 860,290) */}
-          <g opacity={prog(t, said + 0.1, 0.5)}>
-            <Label x={860} y={346} size={24} fill={C.teal}>
-              HYDRAULICS POWER THE
-            </Label>
-            <Label x={860} y={378} size={26} fill={C.cream}>
-              FLAPS · LANDING GEAR · BRAKES
             </Label>
           </g>
         </>
