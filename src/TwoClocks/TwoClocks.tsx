@@ -6,11 +6,9 @@ import {
   delayRender,
   Easing,
   Freeze,
-  Img,
   interpolate,
   OffthreadVideo,
   Sequence,
-  spring,
   staticFile,
   useCurrentFrame,
 } from "remotion";
@@ -18,7 +16,6 @@ import "./fonts.css";
 import { C } from "./art";
 import {
   ACT1,
-  CREDITS_SEC,
   DEMO_AUDIO,
   DEMO_FRAMES,
   DEMO_SRC,
@@ -40,9 +37,8 @@ import { S1, S2, S3, S4, S5, S7, S8, S9 } from "./scenes1";
 import { S11, S12, S13, S14, S16 } from "./scenes2";
 import { S17, S18, S19 } from "./scenes3";
 
-const CREDITS_FRAMES = Math.round(CREDITS_SEC * FPS); // sized so the music's ending lands on the end of the video
 const INTRO_FRAMES = Math.round(INTRO_SEC * FPS);
-export const TWO_CLOCKS_FRAMES = INTRO_FRAMES + TOTAL_FRAMES + CREDITS_FRAMES;
+export const TWO_CLOCKS_FRAMES = INTRO_FRAMES + TOTAL_FRAMES;
 export const TWO_CLOCKS_FPS = FPS;
 
 const SCENES: React.FC[] = [
@@ -113,7 +109,7 @@ const Demo: React.FC = () => {
           <OffthreadVideo src={staticFile(DEMO_SRC)} style={{ width: 1920, height: 1080 }} muted />
         </Freeze>
       </div>
-      <Audio src={staticFile(DEMO_AUDIO)} volume={(fr) => interpolate(fr, [0, 4], [0, 1], clamp)} />
+      <Audio src={staticFile(DEMO_AUDIO)} volume={(fr) => interpolate(fr, [0, 4, DEMO_FRAMES - outF, DEMO_FRAMES], [0, 1, 1, 0], clamp)} />
     </AbsoluteFill>
   );
 };
@@ -162,110 +158,6 @@ const GrainGate: React.FC = () => {
   return present >= 1 ? null : (
     <AbsoluteFill style={{ opacity: 1 - present }}>
       <Grain />
-    </AbsoluteFill>
-  );
-};
-
-const NAMES = [
-  "Abhinav Annabathula",
-  "Christopher Alphonse",
-  "Ikechukwu Anyanwu",
-  "Jasmine Lorenz",
-  "Sam Roberts",
-];
-
-// Southwest plane glides in from the bottom right, settles, then hovers
-const CreditsPlane: React.FC = () => {
-  const f = useCurrentFrame();
-  const p = spring({
-    frame: f - 1.0 * FPS,
-    fps: FPS,
-    config: { damping: 20, stiffness: 55, mass: 1.2 },
-  });
-  const hover = f > 2.5 * FPS ? Math.sin((f - 2.5 * FPS) / 30) * 6 : 0;
-  const o = interpolate(f, [1.0 * FPS, 1.6 * FPS], [0, 1], {
-    extrapolateLeft: "clamp",
-    extrapolateRight: "clamp",
-  });
-  return (
-    <Img
-      src={staticFile("plane.png")}
-      style={{
-        position: "absolute",
-        right: 60,
-        bottom: 70,
-        width: 640,
-        opacity: o,
-        transform: `translate(${(1 - p) * 900}px, ${(1 - p) * 140 + hover}px) rotate(${(1 - p) * -8}deg)`,
-        filter: "drop-shadow(0 30px 40px rgba(0,0,0,0.55))",
-      }}
-    />
-  );
-};
-
-const Credits: React.FC = () => {
-  const f = useCurrentFrame();
-  const fade = (from: number, dur = 0.8) =>
-    interpolate(f, [from * FPS, (from + dur) * FPS], [0, 1], {
-      extrapolateLeft: "clamp",
-      extrapolateRight: "clamp",
-    });
-  const out = interpolate(
-    f,
-    [CREDITS_FRAMES - 0.8 * FPS, CREDITS_FRAMES],
-    [1, 0],
-    { extrapolateLeft: "clamp", extrapolateRight: "clamp" },
-  );
-  return (
-    <AbsoluteFill
-      style={{
-        alignItems: "center",
-        justifyContent: "center",
-        opacity: out,
-        color: C.cream,
-      }}
-    >
-      <div
-        style={{
-          fontFamily: "Caveat, cursive",
-          fontWeight: 700,
-          fontSize: 96,
-          color: C.gold,
-          opacity: fade(0.3),
-        }}
-      >
-        Swoice
-      </div>
-      <div
-        style={{
-          fontFamily: "Inter, sans-serif",
-          fontWeight: 500,
-          fontSize: 28,
-          letterSpacing: 8,
-          paddingLeft: 8,
-          textTransform: "uppercase",
-          color: C.muted,
-          margin: "8px 0 48px",
-          opacity: fade(0.6),
-        }}
-      >
-        Built by
-      </div>
-      <CreditsPlane />
-      {NAMES.map((n, i) => (
-        <div
-          key={n}
-          style={{
-            fontFamily: "Inter, sans-serif",
-            fontWeight: 900,
-            fontSize: 60,
-            lineHeight: 1.4,
-            opacity: fade(1.1 + i * 0.45),
-          }}
-        >
-          {n}
-        </div>
-      ))}
     </AbsoluteFill>
   );
 };
@@ -324,9 +216,6 @@ export const TwoClocks: React.FC = () => {
           <Demo />
         </Sequence>
         <Music />
-        <Sequence from={TOTAL_FRAMES} durationInFrames={CREDITS_FRAMES}>
-          <Credits />
-        </Sequence>
       </Sequence>
       <GrainGate />
     </AbsoluteFill>

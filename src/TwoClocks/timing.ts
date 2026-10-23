@@ -39,7 +39,7 @@ export const ACT1 = 13; // number of narrated scenes before the demo
 export const DEMO_SRC = "music/FINAL.mp4"; // 3840x2160, 29.97 fps, 76.41 s; its own audio is muted
 export const DEMO_AUDIO = "music/swoice-demo-narration 1.wav"; // 82.61 s; this is the demo's only sound
 export const DEMO_VIDEO_FRAMES = 1812; // 75.5 s of the 76.41 s video (the macOS screenshot toolbar fades in after ~75.7 s); after this the last frame is held while the narration finishes
-export const DEMO_FRAMES = 1995; // 82.61 s of narration (1983 frames) plus X_OUT, so the fade-out starts after the last word
+export const DEMO_FRAMES = 1908; // cut right after "...with a person in control." (ends 78.96 s, frame 1896) plus X_OUT, so the fade-out starts after that word; "Execute with confidence. And that's a wrap." is dropped
 export const DEMO_SEC = DEMO_FRAMES / FPS;
 export const X_IN = 1; // crossfade from the last scene into the demo (s)
 export const X_OUT = 0.5; // crossfade from the demo into the first scene of act 2 (s)
@@ -77,17 +77,17 @@ export const MUSIC1 = planMusic(BASE_SEC[0] - MUSIC_INTRO, 0, ACT1_BASE);
 export const ACT1_SEC = ACT1_BASE + MUSIC1.credits;
 export const DEMO_START = ACT1_SEC - X_IN;
 export const ACT2_START = DEMO_START + DEMO_SEC - X_OUT;
-// act 2: the groove enters on the cut from the demo, and the track's ending lands on the last frame of the credits
-const MIN_CREDITS = 5; // seconds of end credits after the conclusion
-export const MUSIC2 = planMusic(ACT2_START, MUSIC_INTRO, ACT2_START + ACT2_BASE + MIN_CREDITS);
-export const CREDITS_SEC = MIN_CREDITS + MUSIC2.credits;
-export const TOTAL_SEC = ACT2_START + ACT2_BASE; // the last narrated scene ends here; the credits follow
+// act 2: the groove enters on the cut from the demo, and the track's ending lands on the last frame of the video (no credits roll;
+// the leftover, under 4 s, is added to the last scene like in act 1)
+export const MUSIC2 = planMusic(ACT2_START, MUSIC_INTRO, ACT2_START + ACT2_BASE);
+export const CREDITS_SEC = 0;
+export const TOTAL_SEC = ACT2_START + ACT2_BASE + MUSIC2.credits;
 export const TOTAL_FRAMES = Math.round(TOTAL_SEC * FPS);
 
 export const SCENE_START = BASE_SEC.map((_, i) =>
   i < ACT1 ? BASE_SEC.slice(0, i).reduce((a, b) => a + b, 0) : ACT2_START + BASE_SEC.slice(ACT1, i).reduce((a, b) => a + b, 0),
 );
-export const SCENE_SEC = BASE_SEC.map((x, i) => (i === ACT1 - 1 ? x + MUSIC1.credits : x));
+export const SCENE_SEC = BASE_SEC.map((x, i) => (i === ACT1 - 1 ? x + MUSIC1.credits : i === BASE_SEC.length - 1 ? x + MUSIC2.credits : x));
 
 /** Seconds into scene `i` (0-based) at which `phrase` starts being spoken (measured from the audio, see align.json). */
 export const when = (i: number, phrase: string): number => {

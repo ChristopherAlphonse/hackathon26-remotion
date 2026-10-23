@@ -53,7 +53,7 @@ Everything is driven by `src/TwoClocks/timing.ts`. Scene starts and narration la
 
 - Each narration line starts half a second (1 beat) into its scene and gets at least 0.25 s of silence after it. Scene lengths round up to a whole beat (0.5 s). All drawn animations run `PACE = 1.2` times faster (`src/TwoClocks/art.tsx`).
 - Clips play at the recorded speed (`VOICE_RATE = 1`). `NARR_RAW` holds the recorded lengths.
-- Demo placement: the demo starts `X_IN` (1 s) before the last act 1 scene ends and plays `DEMO_FRAMES` frames. It is cut at 130.67 s because the recording shows the macOS screenshot toolbar after about 131 s. Act 2 starts `X_OUT` (0.5 s) before the demo ends, so changing `DEMO_FRAMES` moves act 2, the music and the total length automatically.
+- Demo placement: the demo starts `X_IN` (1 s) before the last act 1 scene ends and plays `DEMO_FRAMES` frames. The demo plays `music/FINAL.mp4` (muted) with `music/swoice-demo-narration 1.wav` as its only sound, and is cut right after "...with a person in control." (78.96 s of the narration), so the closing "Execute with confidence. And that's a wrap." is dropped; the last video frame is held after 75.5 s. Act 2 starts `X_OUT` (0.5 s) before the demo ends, so changing `DEMO_FRAMES` moves act 2, the music and the total length automatically.
 - To make the demo mp4 from a `.mov` (the source is variable frame rate): `ffmpeg -i video1.mov -vf "fps=24,scale=-2:1080" -c:v libx264 -crf 20 -pix_fmt yuv420p -c:a aac -b:a 160k public/demo/video1.mp4`.
 - The music's own ending lands on the last frame: the leftover time (under 4 s) is added to the last scene.
 
