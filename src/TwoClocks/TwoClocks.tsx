@@ -116,7 +116,12 @@ export const TwoClocks: React.FC = () => {
   }, [handle]);
 
   return (
-    <AbsoluteFill style={{ backgroundColor: C.navy }}>
+    <AbsoluteFill
+      style={{
+        backgroundColor: C.navy,
+        translate: "-1px 0px"
+      }}
+    >
       <AbsoluteFill style={{ background: `linear-gradient(180deg, ${C.navy} 0%, #0d1830 100%)` }} />
       {SCENES.map((Scene, i) => (
         <Sequence key={i} from={FRAMES[i].from} durationInFrames={FRAMES[i].len}>
