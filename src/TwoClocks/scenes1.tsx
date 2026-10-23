@@ -318,6 +318,14 @@ export const S5: React.FC = () => {
   const needle = mix(-90, 90, Math.min(0.94, conf));
   const gx = 960;
   const gy = 820;
+  // opening beats: the call is heard (waves), becomes text (strip), gets a score (gauge), and is not self-graded
+  const textAt = when(4, "becomes text");
+  const scoreAt = when(4, "confidence score");
+  const selfAt = when(4, "grading itself") - 0.6;
+  const blendAt = when(4, "It blends");
+  const wavesO = prog(t, 0.3, 0.6) * (1 - prog(t, textAt + 0.1, 0.5));
+  const stripO = prog(t, textAt, 0.7);
+  const selfO = prog(t, selfAt, 0.5) * (1 - prog(t, blendAt - 0.2, 0.5));
   const feeders = [
     { x: 560, label: "audio quality", d: drops[0] },
     { x: 960, label: "the words", d: drops[1] },
@@ -338,8 +346,24 @@ export const S5: React.FC = () => {
         </>
       }
     >
-      <g transform={`translate(0 ${mix(-160, 0, prog(t, 0.4, 0.9))})`} opacity={prog(t, 0.4, 0.7)}>
+      {/* the radio call, heard */}
+      <g opacity={wavesO}>
+        {Array.from({ length: 41 }).map((_, i) => {
+          const env = Math.sin((i / 40) * Math.PI);
+          const h = 14 + 120 * env * Math.abs(Math.sin(t * 5 + i * 0.9)) * Math.abs(Math.sin(i * 0.37 + 1));
+          return <rect key={i} x={480 + i * 24} y={250 - h / 2} width={12} height={h} rx={6} fill={C.teal} />;
+        })}
+      </g>
+      {/* ...becomes text */}
+      <g transform={`translate(0 ${mix(-40, 0, stripO)})`} opacity={stripO}>
         <Strip x={960} y={250} w={980} h={160} lines={3} seed={2} />
+      </g>
+      {/* the score is not the software grading itself */}
+      <g opacity={selfO} transform="translate(960 462) scale(0.62)">
+        <rect x={-110} y={-70} width={220} height={140} rx={16} fill={C.panel} stroke={C.cream} strokeWidth={8} />
+        <path d="M-44 4 l30 32 l62 -68" fill="none" stroke={C.gold} strokeWidth={16} strokeLinecap="round" strokeLinejoin="round" />
+        <circle r={110} fill="none" stroke={C.red} strokeWidth={18} />
+        <line x1={-78} y1={-78} x2={78} y2={78} stroke={C.red} strokeWidth={18} strokeLinecap="round" />
       </g>
       {/* feeders */}
       {feeders.map((f, i) => {
@@ -369,7 +393,7 @@ export const S5: React.FC = () => {
         );
       })}
       {/* gauge */}
-      <g opacity={prog(t, 0.9, 0.8)}>
+      <g opacity={prog(t, scoreAt - 0.2, 0.7)}>
         <path d={`M${gx - 230} ${gy} A230 230 0 0 1 ${gx + 230} ${gy}`} fill="none" stroke={C.ink} strokeWidth={46} strokeLinecap="round" />
         <path d={`M${gx - 230} ${gy} A230 230 0 0 1 ${gx + 230} ${gy}`} fill="none" stroke={C.cream} strokeWidth={34} strokeLinecap="round" />
         <path d={`M${gx - 230} ${gy} A230 230 0 0 1 ${gx + 230} ${gy}`} fill="none" stroke={C.teal} strokeWidth={34} strokeLinecap="round" pathLength={1} strokeDasharray={`${Math.min(0.94, conf)} 2`} />
