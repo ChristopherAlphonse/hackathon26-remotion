@@ -1,94 +1,108 @@
-# Remotion Still Image template
+# The Two Clocks
 
-A template for designing still images with dynamic data with built-in server for deploying to the cloud.
+A narrated, animated explainer built with [Remotion](https://www.remotion.dev/). It shows how a spoken radio call from the ramp ("hydraulic") becomes a checked, human-approved update in an airline's system of record, instead of sitting unheard while the system says "on time".
 
 <p align="center">
     <img src="cover.png">
 </p>
 
+- 1920x1080 at 24 fps, roughly 4 minutes 20 seconds: a 7 s "Runway Rebels presents" intro, 17 narrated scenes, then credits.
+- One composition, `TwoClocks` (`src/Root.tsx`).
+- Narration is generated with ElevenLabs. The music bed and intro sound effect are in the repo.
+
+## Setup
+
+Requires Node `^20.19.0 || ^22.13.0 || >=24`.
+
+```console
+npm install
+```
+
 ## Commands
 
-**Design mode: Create an image in React**
-
 ```console
-npm run dev
+npm run dev       # open Remotion Studio and preview the video
+npm run render    # render to out/twoclocks.mp4
+npm run build     # bundle the project (remotion bundle)
+npm run lint      # eslint + tsc
+npm run upgrade   # upgrade Remotion
 ```
 
-**Render it**
+## Project layout
+
+| Path | What it is |
+|---|---|
+| `src/Root.tsx` | Registers the `TwoClocks` composition |
+| `src/TwoClocks/TwoClocks.tsx` | Top-level sequence: intro, scenes 1 to 17, credits, audio |
+| `src/TwoClocks/Intro.tsx` | "Runway Rebels presents" intro |
+| `src/TwoClocks/scenes1.tsx`, `scenes2.tsx` | Scenes S1 to S9 and S10 to S17 |
+| `src/TwoClocks/art.tsx` | Shared drawn pieces (plane, ground, clocks, crew, and so on) |
+| `src/TwoClocks/timing.ts` | Narration text, clip lengths, scene lengths and music plan |
+| `src/TwoClocks/Music.tsx` | Builds the music bed (intro, loop, ending) to fit the video length |
+| `public/twoclocks/n1.wav` to `n17.wav` | Narration, one clip per scene |
+| `public/music/bed.mp3` | Music bed, 120 BPM |
+| `public/sfx/intro.wav` | Intro sound effect |
+| `scripts/` | Narration and sound-effect generators (see below) |
+| `presentation/` | Video production package and the 3-minute presentation script |
+| `src/server/` | Optional image server (see below) |
+
+## Timing
+
+Everything is driven by `src/TwoClocks/timing.ts`. Scene starts and narration land on the music's beat grid (120 BPM, one beat is 0.5 s), and each scene length is derived from its narration clip length. If you change the narration, update `NARR_RAW` (the raw clip lengths in seconds); scene lengths, cuts and the music loop are computed from it.
+
+## Regenerate the narration
+
+Needs an ElevenLabs key and macOS (`afconvert` is used to make the WAV files).
+
+1. Put `ELEVENLABS_API_KEY=...` in `.env.local` (see `.env.example`). `.env.local` is gitignored.
+2. Run:
 
 ```console
-npx remotion render
+npx tsx --env-file=.env.local scripts/generate-narration.mts
 ```
 
-**Keep Remotion up to date**
+Useful options: `--scenes 1,2,3` to redo only some scenes, `--out DIR`, `--model ID`, `--stability N`, `--style N`, `--speed N`, `--tag "[upbeat]"`. It reads the lines from `TEXT` in `timing.ts` and writes `n1.wav` to `n17.wav` (mono, 44.1 kHz, 16-bit) into `public/twoclocks` by default.
+
+After regenerating, measure the new clip lengths and update `NARR_RAW` in `timing.ts`.
+
+## Regenerate the intro sound effect
+
+Needs Python 3 and numpy.
 
 ```console
-npx remotion upgrade
+python3 scripts/make-intro-sfx.py
 ```
 
-## Server
+It writes `public/sfx/intro.wav`. Brick timings in the script must match `ROWS`, `FALL` and the exit time in `src/TwoClocks/Intro.tsx`.
 
-You can run a server that serves dynamic images based on it's URL. Run
+## Presentation material
+
+- `presentation/educational-video-package.md`: titles, narrative approach, scene plan and a source map for every fact in the video.
+- `presentation/presentation-script.md`: the 3-minute "The Ramp Knows" presentation script.
+
+## Image server (from the template)
+
+The project started from the Remotion still-image template, and the server is still included. It renders a composition as a still image on request.
 
 ```console
 npm run server
 ```
 
-And then visit `http://localhost:8000/TwoClocks.png` in your browser to render an image.
+Then open `http://localhost:8000/TwoClocks.png`. Use the composition ID in the path and a `.png` or `.jpeg` extension. Query strings are passed as input props, for example `?title=Hello+World`. The server needs [Bun](https://bun.sh) (installed as a dev dependency).
 
-- Specify the ID of the composition you want to render after the `/`. You can edit the compositions in `src/Video.tsx`.
-- Add either a `.png` or a `.jpeg` extension depending on which image format you want.
-- You can add input props to your React component by adding query strings: `?title=Hello+World&description=foobar` will pass `{"title": "Hello World", "description": "foo bar"}` to the component.
+Caching is set by `CACHE_MODE` in `src/server/config.ts`:
 
-### Caching
+- `"filesystem"` (default) caches images locally.
+- `"none"` renders every request.
+- `"s3-bucket"` caches in S3. Set `AWS_BUCKET_NAME` and `AWS_REGION` in `config.ts`, and provide `AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY` in `.env` (see `.env.example`).
 
-In `src/server/config.ts`, you can configure three types of caching:
+The server has no authentication or access control, so put it behind something before exposing it publicly. A `Dockerfile` is included for deploying it. For serverless stills, see [Remotion Lambda](https://remotion.dev/lambda).
 
-- `"filesystem"`, the default, will cache generated images locally. This is a good way of caching if you host the server on a non-ephemereal platform and have enough storage.
-- `"none"` will disable all caching and calculate all images on the fly.
+## Docs and help
 
-- `"s3-bucket"` will cache images in a S3 bucket. If you choose this option, you need to provide `AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY` environment variables containing AWS credentials which have permission of reading and writing to S3 as well as configure a bucket name and region in `src/server/config.ts`.
-
-<details>
-<summary>How to set up an S3 bucket</summary>
-<ul>
-<li>Go to https://s3.console.aws.amazon.com/s3/home and create a new bucket. You can leave the "Deny all public access" checkbox checked.
-</li>
-<li>
-Fill out region and bucket name in <code>src/server/config.ts</code>.
-</li>
-<li>
-Go to https://console.aws.amazon.com/iamv2/home?#/users to create a new user. While creating, enable "Programmatic Access". When adding permissions, choose "Attach existing policies directly" and then search for "AmazonS3FullAccess" and assign it.
-</li>
-<li>
-In the last step you will get a value for <code>AWS_ACCESS_KEY_ID</code> and <code>AWS_SECRET_ACCESS_KEY</code> which you need to set as an environment variable. Locally, you can rename the <code>.env.example</code> file to <code>.env</code>. When you deploy the server, you can set the environment variables in the dashboard of your provider.
-</li>
-</ul>
-</details>
-
-### Deploy to Heroku
-
-To deploy the server to Heroku, you need to add the Google Chrome Buildpack. Go to the settings of your Heroku app and in the `Buildpacks` section, add `https://github.com/heroku/heroku-buildpack-google-chrome` as a buildpack.
-
-### Deploy to DigitalOcean
-
-The easiest way to deploy to DigitalOcean is to use the dockerized image and run it on the DigitalOcean App Platform. Go to https://cloud.digitalocean.com/apps/new and connect your Github repository and deploy the
-
-### Serverless
-
-Use [Remotion Lambda](https://remotion.dev/lambda) if you want to render stills inside a Lambda function.
-
-## Docs
-
-Get started with Remotion by reading the [fundamentals page](https://www.remotion.dev/docs/the-fundamentals).
-
-## Help
-
-We provide help on our [Discord server](https://discord.gg/6VzzNDwUwV).
-
-## Issues
-
-Found an issue with Remotion? [File an issue here](https://github.com/remotion-dev/remotion/issues/new).
+- [Remotion fundamentals](https://www.remotion.dev/docs/the-fundamentals)
+- [Remotion Discord](https://discord.gg/6VzzNDwUwV)
+- [Report a Remotion issue](https://github.com/remotion-dev/remotion/issues/new)
 
 ## License
 
