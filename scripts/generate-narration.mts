@@ -2,7 +2,7 @@
 //
 //   npx tsx --env-file=.env.local scripts/generate-narration.mts [--out DIR] [--scenes 1,2,3] [--model ID] [--stability N] [--style N] [--speed N] [--tag "[upbeat]"]
 //
-// Reads each line from src/TwoClocks/timing.ts (TEXT) and writes n1.wav .. n17.wav (mono, 44.1 kHz, 16-bit)
+// Reads each line from src/TwoClocks/timing.ts (TEXT) and writes n1.wav .. n16.wav (mono, 44.1 kHz, 16-bit)
 // into --out (default public/twoclocks). The key is read from ELEVENLABS_API_KEY; it is never printed.
 import { ElevenLabsClient } from "@elevenlabs/elevenlabs-js";
 import { execFileSync } from "node:child_process";

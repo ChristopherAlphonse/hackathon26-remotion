@@ -23,10 +23,16 @@ export const C = {
 // ---------- time helpers ----------
 const clamp01 = (x: number) => Math.min(1, Math.max(0, x));
 export const ease = (t: number) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
-/** Eased 0..1 progress that starts at `at` seconds and lasts `dur` seconds. */
-export const prog = (t: number, at: number, dur: number) => ease(clamp01((t - at) / dur));
+/** The short cut plays every animation PACE times faster than it was drawn. */
+export const PACE = 1.2;
+/** Eased 0..1 progress that starts at `at` seconds and lasts `dur` seconds (at the original pace). */
+export const prog = (t: number, at: number, dur: number) => ease(clamp01(((t - at) * PACE) / dur));
 /** Linear 0..1 progress. */
-export const lin = (t: number, at: number, dur: number) => clamp01((t - at) / dur);
+export const lin = (t: number, at: number, dur: number) => clamp01(((t - at) * PACE) / dur);
+/** Eased 0..1 progress between two moments in seconds (real time, not scaled by PACE). Use it to make a motion last exactly as long as the phrase it illustrates. */
+export const seg = (t: number, from: number, to: number) => ease(clamp01((t - from) / Math.max(0.01, to - from)));
+/** Linear version of `seg`. */
+export const segLin = (t: number, from: number, to: number) => clamp01((t - from) / Math.max(0.01, to - from));
 export const mix = (a: number, b: number, p: number) => a + (b - a) * p;
 /** Local scene time in seconds. */
 export const useT = () => useCurrentFrame() / FPS;

@@ -6,7 +6,7 @@ A narrated, animated explainer built with [Remotion](https://www.remotion.dev/).
     <img src="cover.png">
 </p>
 
-- 1920x1080 at 24 fps, about 4 minutes 25 seconds (264.5 s): a 7 s "Runway Rebels presents" intro, 17 narrated scenes (246 s), then about 11.5 s of credits.
+- 1920x1080 at 24 fps, about 5 minutes 41 seconds (341 s): a 7 s "Runway Rebels presents" intro, 13 narrated scenes (S1 to S16), the screen recording of the demo (`public/demo/video1.mp4`, about 130 s, with its own audio), then three closing scenes (S17 value, S18 rollout, S19 conclusion, about 1 minute). Narration is split into `ACT1` (13 scenes) and act 2 (3 scenes) in `timing.ts`.
 - One composition, `TwoClocks` (`src/Root.tsx`).
 - Narration is generated with ElevenLabs (voice: Matilda). The music bed and intro sound effect are in the repo, so you only need an ElevenLabs key if you change the narration.
 
@@ -33,13 +33,14 @@ npm run upgrade   # upgrade Remotion
 | Path | What it is |
 |---|---|
 | `src/Root.tsx` | Registers the `TwoClocks` composition |
-| `src/TwoClocks/TwoClocks.tsx` | Top-level sequence: intro, scenes 1 to 17, credits, audio |
+| `src/TwoClocks/TwoClocks.tsx` | Top-level sequence: intro, 13 scenes, audio |
 | `src/TwoClocks/Intro.tsx` | "Runway Rebels presents" intro |
-| `src/TwoClocks/scenes1.tsx`, `scenes2.tsx` | Scenes S1 to S9 and S10 to S17 |
+| `src/TwoClocks/scenes1.tsx`, `scenes2.tsx`, `scenes3.tsx` | Scenes S1 to S9, S11 to S16 (S6, S10 and S15 were cut from the script) and the closing scenes S17 to S19 |
 | `src/TwoClocks/art.tsx` | Shared drawn pieces (plane, ground, clocks, crew, and so on) |
 | `src/TwoClocks/timing.ts` | Narration text, clip lengths, scene lengths and music plan |
 | `src/TwoClocks/Music.tsx` | Builds the music bed (intro, loop, ending) to fit the video length |
-| `public/twoclocks/n1.wav` to `n17.wav` | Narration, one clip per scene |
+| `public/twoclocks/n1.wav` to `n16.wav` | Narration, one clip per scene |
+| `public/demo/video1.mp4` | Demo screen recording (24 fps H.264/AAC copy of `video1.mov`) |
 | `public/music/bed.mp3` | Music bed, 120 BPM |
 | `public/sfx/intro.wav` | Intro sound effect |
 | `scripts/` | Narration and sound-effect generators (see below) |
@@ -48,11 +49,13 @@ npm run upgrade   # upgrade Remotion
 
 ## Timing
 
-Everything is driven by `src/TwoClocks/timing.ts`. Scene starts and narration land on the music's beat grid (120 BPM, one beat is 0.5 s), and each scene length is derived from its narration clip length. If you change the narration, update `NARR_RAW` (the raw clip lengths in seconds); scene lengths, cuts, the music loop and the credits length are computed from it.
+Everything is driven by `src/TwoClocks/timing.ts`. Scene starts and narration land on the music's beat grid (120 BPM, one beat is 0.5 s), and each scene length is derived from its narration clip length. If you change the narration, update `NARR_RAW` (the raw clip lengths in seconds); scene lengths, cuts, and the music loop are computed from it.
 
-- Each narration line starts 1 s (2 beats) into its scene and gets at least 1 s of silence after it. Scene lengths round up to whole seconds.
-- Clips play 10% faster than they were recorded (`VOICE_RATE = 1.1`) to match the music's tempo. `NARR_RAW` holds the recorded lengths, before the speed-up.
-- Credits are sized so the music's own ending lands on the last frame, with at least 8 s of credits.
+- Each narration line starts half a second (1 beat) into its scene and gets at least 0.25 s of silence after it. Scene lengths round up to a whole beat (0.5 s). All drawn animations run `PACE = 1.2` times faster (`src/TwoClocks/art.tsx`).
+- Clips play at the recorded speed (`VOICE_RATE = 1`). `NARR_RAW` holds the recorded lengths.
+- Demo placement: the demo starts `X_IN` (1 s) before the last act 1 scene ends and plays `DEMO_FRAMES` frames. It is cut at 130.67 s because the recording shows the macOS screenshot toolbar after about 131 s. Act 2 starts `X_OUT` (0.5 s) before the demo ends, so changing `DEMO_FRAMES` moves act 2, the music and the total length automatically.
+- To make the demo mp4 from a `.mov` (the source is variable frame rate): `ffmpeg -i video1.mov -vf "fps=24,scale=-2:1080" -c:v libx264 -crf 20 -pix_fmt yuv420p -c:a aac -b:a 160k public/demo/video1.mp4`.
+- The music's own ending lands on the last frame: the leftover time (under 4 s) is added to the last scene.
 
 ## Regenerate the narration
 
@@ -79,7 +82,7 @@ Options:
 | `--style N` | `0.5` | Not supported on `eleven_v4` |
 | `--speed N` | `1.1` | Not supported on `eleven_v4` |
 
-The script reads the lines from `TEXT` in `timing.ts` and writes `n1.wav` to `n17.wav` (mono, 44.1 kHz, 16-bit).
+The script reads the lines from `TEXT` in `timing.ts` and writes `n1.wav` to `n16.wav` (mono, 44.1 kHz, 16-bit).
 
 After regenerating, measure each new clip and update `NARR_RAW` in `timing.ts`:
 

@@ -11,36 +11,56 @@ import {
   Ground,
   Hand,
   Label,
+  PACE,
   Plane,
   Ribbon,
   Strip,
   Tick,
   handsFor,
-  lin,
   mix,
   prog,
+  seg,
+  segLin,
   useT,
 } from "./art";
-import { NARR, when } from "./timing";
+import { LEAD, NARR, endOf, when } from "./timing";
 
 // Scenes 1 to 9 of presentation/educational-video-package.md (section E).
 
 // ---------- 1 · The word ----------
 export const S1: React.FC = () => {
   const t = useT();
-  const zoom = mix(1, 1.14, lin(t, 0, NARR[0] + 1));
-  const said = when(0, "hydraulic");
-  const p = prog(t, said - 0.1, 1.6);
-  const talk = t > said - 0.4 && t < said + 0.5 ? 1 : 0;
+  const zoom = mix(1, 1.14, segLin(t, 0, endOf(0)));
+  // The captain's whole radio call, shown line by line as it is spoken
+  const callAt = when(0, "Ground, sixteen");
+  const line2At = when(0, "Maintenance is walking");
+  const line3At = when(0, "Probably thirty");
+  const p = seg(t, callAt - 0.1, line2At);
+  const talk = t > callAt && t < LEAD + NARR[0] ? (Math.sin(t * 16) > -0.2 ? 1 : 0.15) : 0;
   const ribbon = "M1345 640 C1440 560 1500 420 1600 470 C1700 520 1700 640 1780 600 C1860 560 1880 700 1800 770";
   return (
     <Art
       overlay={
         <>
           <g opacity={prog(t, 0.4, 0.8)}>
-            <rect x={110} y={84} width={330} height={64} rx={12} fill={C.cream} />
-            <Label x={275} y={128} size={30} fill={C.ink}>
-              SCHEDULED 15:40
+            <rect x={110} y={84} width={640} height={64} rx={12} fill={C.cream} />
+            <Label x={430} y={128} size={30} fill={C.ink}>
+              WN1628 · GATE A12 · PUSH 15:40
+            </Label>
+          </g>
+          <g opacity={prog(t, callAt - 0.2, 0.5)}>
+            <rect x={200} y={826} width={1520} height={206} rx={16} fill={C.panel} fillOpacity={0.94} stroke={C.teal} strokeWidth={4} />
+            <Label x={240} y={870} size={24} fill={C.teal} anchor="start" spacing={3}>
+              CAPTAIN · GROUND FREQUENCY · 15:36
+            </Label>
+            <Label x={240} y={922} size={38} fill={C.cream} anchor="start" spacing={0.5} opacity={prog(t, callAt, 0.4)}>
+              “Ground, WN1628. We have a hydraulic system two caution.
+            </Label>
+            <Label x={240} y={970} size={38} fill={C.cream} anchor="start" spacing={0.5} opacity={prog(t, line2At, 0.4)}>
+              Maintenance is walking out to us now.
+            </Label>
+            <Label x={240} y={1018} size={38} fill={C.gold} anchor="start" spacing={0.5} opacity={prog(t, line3At, 0.4)}>
+              Probably thirty to forty minutes before we can push.”
             </Label>
           </g>
         </>
@@ -72,9 +92,6 @@ export const S1: React.FC = () => {
           cockpit={<Bust x={643} y={100} s={0.28} skin={C.skinB} shirt={C.cream} kind="pilot" talk={talk} />}
         />
         <Ribbon d={ribbon} p={p} len={0.55} />
-        <Hand x={1600} y={380} size={92} fill={C.teal} rotate={-6} opacity={prog(t, said + 0.5, 0.6)}>
-          hydraulic
-        </Hand>
       </g>
     </Art>
   );
@@ -99,11 +116,14 @@ const Walker: React.FC<{ x: number; y: number; s?: number; step: number }> = ({ 
 // ---------- 2 · Everyone hears, the Board smiles ----------
 export const S2: React.FC = () => {
   const t = useT();
-  const pan = mix(110, -150, prog(t, 0.6, NARR[1]));
-  const reach = prog(t, 0.3, 2.6);
-  const ripple = lin(t, 3.0, 1.6);
-  const walk = Math.max(0, t - when(1, "Maintenance"));
-  const wx = mix(700, 1000, lin(t, when(1, "Maintenance"), 3.2));
+  const hearsAt = when(1, "Everyone hears");
+  const butAt = when(1, "But Flight");
+  const pan = mix(110, -150, seg(t, 0.6, endOf(1)));
+  // the sound travels while "everyone hears it" is said, and hits the glass at "But Flight Operations"
+  const reach = seg(t, hearsAt, butAt);
+  const ripple = segLin(t, butAt, butAt + 1.4);
+  const walk = Math.max(0, t - when(1, "Everyone hears"));
+  const wx = mix(700, 1000, segLin(t, hearsAt, butAt));
   const ribbon = "M-40 470 C 200 380 520 400 700 450 S 1000 480 1090 540";
   return (
     <Art>
@@ -114,6 +134,12 @@ export const S2: React.FC = () => {
         <rect x={1120} y={200} width={660} height={560} rx={16} fill="#1c2c52" stroke={C.ink} strokeWidth={9} />
         <rect x={1140} y={220} width={620} height={520} rx={8} fill="#26396b" />
         <BoardChar x={1450} y={470} s={0.9} status="ON TIME" />
+        <Hand x={1450} y={262} size={56} fill={C.teal} opacity={prog(t, when(1, "Flight Operations"), 0.6)}>
+          Flight Ops system
+        </Hand>
+        <Hand x={1450} y={870} size={46} fill={C.cream} opacity={prog(t, when(1, "the record"), 0.6)}>
+          crews · gates · connections plan from this
+        </Hand>
         <path d="M1450 200 L1450 760 M1120 480 L1780 480" stroke={C.ink} strokeWidth={8} opacity={0.5} />
         {/* ramp lead + maintenance */}
         <Bust x={380} y={600} s={1.5} skin={C.skinA} shirt="#4a5f9a" kind="ramp" look={-1} talk={0} />
@@ -134,12 +160,12 @@ export const S2: React.FC = () => {
 // ---------- 3 · Two clocks ----------
 export const S3: React.FC = () => {
   const t = useT();
-  const run = lin(t, when(2, "One shows"), 7.0);
+  const run = segLin(t, when(2, "One shows"), when(2, "We're missing out"));
   const left = handsFor(15, 40 + 35 * run);
   const right = handsFor(15, 40);
-  const zoom = mix(1, 1.18, prog(t, when(2, "And in the gap"), 4.5));
+  const zoom = mix(1, 1.18, seg(t, when(2, "We're missing out"), endOf(2)));
   const wob = (k: number) => Math.sin(t * 5 + k) * 6;
-  const gapIn = prog(t, when(2, "And in the gap"), 0.8);
+  const gapIn = prog(t, when(2, "We're missing out"), 0.8);
   return (
     <Art>
       <g transform={`translate(960 520) scale(${zoom}) translate(-960 -520)`}>
@@ -153,7 +179,13 @@ export const S3: React.FC = () => {
           what is happening
         </Hand>
         <Hand x={1360} y={850} size={64} fill={C.gold} opacity={prog(t, when(2, "The other"), 0.7)}>
-          what is typed in
+          our current systems
+        </Hand>
+        <Hand x={560} y={925} size={44} fill={C.cream} opacity={prog(t, when(2, "this flight"), 0.7)}>
+          WN1628 is really leaving ~16:15
+        </Hand>
+        <Hand x={1360} y={925} size={44} fill={C.cream} opacity={prog(t, when(2, "The other"), 0.7)}>
+          Flight Ops: WN1628 on time 15:40
         </Hand>
         {/* the gap */}
         <g opacity={gapIn}>
@@ -178,9 +210,10 @@ export const S3: React.FC = () => {
 export const S4: React.FC = () => {
   const t = useT();
   const hearAt = when(3, "Could the system");
-  const p = prog(t, hearAt, 2.4);
-  const lean = prog(t, hearAt + 1.2, 1.2);
-  const handUp = prog(t, when(3, "how do you"), 1.2);
+  const listenAt = when(3, "and listen");
+  const p = seg(t, hearAt, listenAt);
+  const lean = seg(t, listenAt, endOf(3));
+  const handUp = seg(t, listenAt, endOf(3));
   const ribbon = "M520 440 C760 330 880 590 1120 450 C1180 420 1230 430 1290 450";
   return (
     <Art>
@@ -201,7 +234,7 @@ export const S4: React.FC = () => {
       </g>
       <Ribbon d={ribbon} p={p} len={1} />
       {/* the dial: a needle that swings toward "decide" but is held back */}
-      <g opacity={prog(t, when(3, "how do you"), 0.8)}>
+      <g opacity={prog(t, when(3, "and listen"), 0.8)}>
         <circle cx={960} cy={830} r={130} fill={C.panel} stroke={C.cream} strokeWidth={9} />
         {Array.from({ length: 11 }).map((_, i) => (
           <line key={i} x1={0} y1={-112} x2={0} y2={-92} stroke={C.cream} strokeWidth={7} strokeLinecap="round" transform={`translate(960 830) rotate(${-120 + i * 24})`} />
@@ -213,7 +246,7 @@ export const S4: React.FC = () => {
       <Hand x={960} y={180} size={96} fill={C.cream} opacity={prog(t, hearAt, 0.7)}>
         Could the system hear it?
       </Hand>
-      <Hand x={960} y={300} size={80} fill={C.gold} opacity={prog(t, when(3, "without letting"), 0.7)}>
+      <Hand x={960} y={300} size={80} fill={C.gold} opacity={prog(t, when(3, "without taking"), 0.7)}>
         ...without it taking over?
       </Hand>
     </Art>
@@ -295,76 +328,19 @@ export const S5: React.FC = () => {
   );
 };
 
-// ---------- 6 · Thirty to forty becomes thirty-five ----------
-export const S6: React.FC = () => {
-  const t = useT();
-  const range = prog(t, when(5, "Probably"), 1.0);
-  const pin = prog(t, when(5, "thirty-five"), 1.0);
-  const lid = prog(t, when(5, "stay untouched"), 0.9);
-  const x0 = 300;
-  const x1 = 1100;
-  const rx = 1520;
-  return (
-    <Art
-      overlay={
-        <>
-          <Label x={x0} y={636} size={44} fill={C.cream}>
-            30
-          </Label>
-          <Label x={x1} y={636} size={44} fill={C.cream}>
-            40
-          </Label>
-          <Label x={(x0 + x1) / 2} y={636} size={64} fill={C.gold} weight={900} opacity={pin}>
-            35
-          </Label>
-          <Label x={rx} y={780} size={26} opacity={lid}>
-            ORIGINAL WORDS, NEVER EDITED
-          </Label>
-        </>
-      }
-    >
-      {/* ruler */}
-      <g opacity={prog(t, 0.4, 0.8)}>
-        <rect x={x0 - 40} y={500} width={x1 - x0 + 80} height={90} rx={10} fill={C.cream} stroke={C.ink} strokeWidth={7} />
-        {Array.from({ length: 21 }).map((_, i) => (
-          <line key={i} x1={x0 + (i * (x1 - x0)) / 20} y1={500} x2={x0 + (i * (x1 - x0)) / 20} y2={i % 5 === 0 ? 548 : 530} stroke={C.ink} strokeWidth={i % 5 === 0 ? 6 : 4} />
-        ))}
-      </g>
-      {/* stretchy range */}
-      <rect x={x0} y={452} width={(x1 - x0) * range} height={34} rx={17} fill={C.gold} fillOpacity={0.35} stroke={C.gold} strokeWidth={5} />
-      <Hand x={(x0 + x1) / 2} y={335} size={58} fill={C.cream} opacity={range}>
-        "probably thirty to forty"
-      </Hand>
-      {/* pin */}
-      <g transform={`translate(${mix(x0, (x0 + x1) / 2, pin)} ${mix(380, 0, 1) + mix(-24, 0, pin)})`} opacity={pin > 0 ? 1 : 0}>
-        <path d="M0 470 L-22 428 A28 28 0 1 1 22 428 Z" fill={C.gold} stroke={C.ink} strokeWidth={6} />
-        <circle cx={0} cy={410} r={9} fill={C.ink} />
-      </g>
-      {/* glass case */}
-      <g opacity={prog(t, 0.6, 0.8)}>
-        <rect x={rx - 250} y={430} width={500} height={260} rx={14} fill="#bdeaff" fillOpacity={0.15} stroke={C.teal} strokeWidth={7} />
-        <Strip x={rx} y={590} w={400} h={90} lines={2} seed={3} />
-        <g transform={`rotate(${mix(-52, 0, lid)} ${rx - 250} 430)`}>
-          <rect x={rx - 260} y={412} width={520} height={30} rx={10} fill={C.teal} stroke={C.ink} strokeWidth={6} />
-        </g>
-      </g>
-    </Art>
-  );
-};
-
 // ---------- 7 · Step two: who owns this? ----------
 export const S7: React.FC = () => {
   const t = useT();
   const cards = [
-    { x: 700, name: "FLIGHT OPS", w: 26, score: "0.92", at: when(6, "ninety-two") },
+    { x: 700, name: "FLIGHT OPS", w: 26, score: "0.92", at: when(5, "ninety-two") },
     { x: 960, name: "GATES", w: 3, score: "", at: 0 },
     { x: 1220, name: "RAMP", w: 3, score: "", at: 0 },
-    { x: 1480, name: "CREW", w: 12, score: "0.41", at: when(6, "forty-one") },
-    { x: 1740, name: "CONNECTIONS", w: 8, score: "0.34", at: when(6, "thirty-four") },
+    { x: 1480, name: "CREW", w: 12, score: "0.41", at: when(5, "Runners-up") },
+    { x: 1740, name: "CONNECTIONS", w: 8, score: "0.34", at: when(5, "Other desks") },
   ];
-  const shoot = when(6, "Hydraulic");
-  const zoom = mix(1, 1.25, prog(t, NARR[6] - 3.2, 2.4));
-  const zoomT = `translate(700 520) scale(${zoom}) translate(-700 -520)`;
+  const shoot = when(5, "Hydraulic");
+  const zoom = mix(1, 1.06, seg(t, 0, endOf(5)));
+  const zoomT = `translate(960 520) scale(${zoom}) translate(-960 -520)`;
   return (
     <Art
       overlay={
@@ -436,10 +412,10 @@ export const S7: React.FC = () => {
 // ---------- 8 · The receipt ----------
 export const S8: React.FC = () => {
   const t = useT();
-  const sweep = prog(t, when(7, "the sentence"), 1.6);
-  const receipt = prog(t, when(7, "quoted word"), 0.9);
-  const check = prog(t, when(7, "They can read"), 0.6);
-  const lens = prog(t, when(7, "Nobody has"), 1.4);
+  const sweep = prog(t, when(6, "exact sentence"), 1.6);
+  const receipt = prog(t, when(6, "behind the routing"), 0.9);
+  const check = prog(t, when(6, "on trust"), 0.6);
+  const lens = prog(t, when(6, "Nobody takes"), 1.4);
   return (
     <Art
       overlay={
@@ -479,22 +455,22 @@ export const S8: React.FC = () => {
 // ---------- 9 · Step three: compare ----------
 export const S9: React.FC = () => {
   const t = useT();
-  const drop = prog(t, when(8, "contradicts"), 1.4);
-  const tilt = prog(t, when(8, "contradicts") + 1.1, 1.1);
+  const drop = prog(t, when(7, "Contradict"), 1.4);
+  const tilt = prog(t, when(7, "Contradict") + 1.1 / PACE, 1.1);
   const a = (tilt * 11 * Math.PI) / 180;
   const beamY = (x: number) => 430 + (x - 960) * Math.tan(a);
   const pans = [
-    { x: 740, label: "MATCH", at: when(8, "agrees") },
-    { x: 960, label: "NEW INFO", at: when(8, "adds something") },
-    { x: 1180, label: "DISCREPANCY", at: when(8, "contradicts") },
+    { x: 740, label: "MATCH", at: when(7, "Agree") },
+    { x: 960, label: "NEW INFO", at: when(7, "Add something") },
+    { x: 1180, label: "DISCREPANCY", at: when(7, "Contradict") },
   ];
   const pulse = (at: number) => Math.max(0, 1 - Math.abs(t - at - 0.5) * 1.2);
   const ticket = {
     x: mix(1620, 1180, drop),
     y: mix(230, beamY(1180) + 170 - 40, drop * drop),
   };
-  const thread = prog(t, when(8, "that gap"), 1.0);
-  const flapPulse = prog(t, when(8, "Look up"), 0.6);
+  const thread = prog(t, when(7, "that gap"), 1.0);
+  const flapPulse = prog(t, when(7, "flight system"), 0.6);
   return (
     <Art
       overlay={
