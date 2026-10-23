@@ -1,5 +1,5 @@
 // Generated from the narration audio (public/twoclocks/n*.wav) and the script in
-// presentation/educational-video-package.md. Durations are the real lengths of the ElevenLabs TTS clips (voice: Matilda).
+// presentation/educational-video-package.md. Durations are the real lengths of the ElevenLabs TTS clips (voice: christopher alphonse, cloned).
 export const FPS = 24;
 // The music bed (public/music/bed.mp3) is 120 BPM: one beat = 0.5 s. Every scene start and every spoken line
 // lands on a beat, so the cuts and the voice are in time with the track.
@@ -9,8 +9,8 @@ export const LEAD = 2 * BEAT; // silence before each line (2 beats)
 const MIN_TAIL = 1.0; // minimum breathing room after each line
 const SCENE_QUANTUM = 2 * BEAT; // scene lengths snap up to a whole 2-beat grid
 // Raw clip lengths (seconds) of public/twoclocks/n*.wav, regenerated with scripts/generate-narration.mts
-// (ElevenLabs eleven_v3, voice Matilda, "[upbeat]"). The clips are played 10% faster to match the music's tempo.
-export const NARR_RAW: number[] = [8.67, 8.91, 11.39, 8.52, 13.17, 11.08, 21.79, 9.8, 18.36, 8.05, 18.6, 14.92, 16.93, 13.17, 9.17, 18.36, 15.07];
+// (ElevenLabs eleven_v4, voice "christopher alphonse" (cloned), cut from one full take with forced alignment). The clips are played 10% faster to match the music's tempo.
+export const NARR_RAW: number[] = [8.18, 8.16, 10.66, 7.62, 12.22, 10.24, 18.50, 9.06, 16.64, 7.02, 16.04, 13.54, 16.86, 12.64, 8.82, 17.06, 14.94];
 export const VOICE_RATE = 1.1;
 export const NARR: number[] = NARR_RAW.map((n) => Math.round((n / VOICE_RATE) * 100) / 100);
 export const TEXT: string[] = [

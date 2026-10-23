@@ -1,6 +1,6 @@
 // Regenerates the TwoClocks narration with ElevenLabs.
 //
-//   npx tsx --env-file=.env.local scripts/generate-narration.mts [--out DIR] [--scenes 1,2,3] [--model ID] [--stability N] [--style N] [--speed N] [--tag "[upbeat]"]
+//   npx tsx --env-file=.env.local scripts/generate-narration.mts [--out DIR] [--voice ID] [--scenes 1,2,3] [--model ID] [--stability N] [--style N] [--speed N] [--tag "[upbeat]"]
 //
 // Reads each line from src/TwoClocks/timing.ts (TEXT) and writes n1.wav .. n17.wav (mono, 44.1 kHz, 16-bit)
 // into --out (default public/twoclocks). The key is read from ELEVENLABS_API_KEY; it is never printed.
@@ -15,7 +15,8 @@ const arg = (name: string, fallback: string): string => {
   return i >= 0 && process.argv[i + 1] ? process.argv[i + 1] : fallback;
 };
 
-const VOICE_ID = "XrExE9yKIg1WjnnlVkGX"; // Matilda, the voice the original narration used
+// Default is Matilda, the voice the original narration used. Pass --voice pvS1ZIJpQEGNG9v2Ixl9 for "christopher alphonse" (cloned).
+const VOICE_ID = arg("voice", "XrExE9yKIg1WjnnlVkGX");
 const out = arg("out", "public/twoclocks");
 const model = arg("model", "eleven_multilingual_v2");
 const stability = Number(arg("stability", "0.35"));
