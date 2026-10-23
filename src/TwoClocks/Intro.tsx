@@ -198,7 +198,7 @@ export const Intro: React.FC = () => {
           strokeLinecap="round"
           pathLength={1}
           strokeDasharray={`${presents} 2`}
-          opacity={presentsOut}
+          opacity={presents > 0 ? presentsOut : 0} // a 0-length dash with a round cap still paints a dot
         />
       </Art>
     </AbsoluteFill>
