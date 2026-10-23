@@ -38,7 +38,7 @@ Count and pace are in D.2. Scene numbers match the storyboard.
 
 **1.** A flight is set to leave Dallas Love Field at 3:40 this afternoon. Then the pilot keys the radio and says one word: hydraulic.
 
-**2.** The ramp hears it. Maintenance starts walking out. But the airline's system of record, the one everybody trusts, still says: on time.
+**2.** The ramp hears it. Maintenance starts walking out. But the airline's official record, the one everybody trusts, still says: on time.
 
 **3.** So the airport runs two clocks. One shows what is happening. The other shows what someone has typed in. And in the gap between them, crews, connections and gates get surprised.
 
@@ -48,25 +48,25 @@ Count and pace are in D.2. Scene numbers match the storyboard.
 
 **6.** "Probably thirty to forty minutes" becomes a working number: thirty-five, the midpoint. But the original words stay untouched, because later, someone will want to see exactly what was said.
 
-**7.** Step two: who owns this? Five desks could: flight operations, gates, ramp, crew, customer connections. "Hydraulic" and "delay" point to flight operations, at ninety-two percent. Crew trails at forty-one, connections at thirty-four. The runners-up are kept, so you can see how close the call was.
+**7.** Step two: who owns this? Five teams could own it: flight operations, gates, ramp, crew, customer connections. "Hydraulic" and "delay" point to flight operations, at ninety-two percent. Crew trails at forty-one, connections at thirty-four. The runners-up are kept, so you can see how close the call was.
 
-**8.** And it keeps the receipt: the sentence that justified the routing, quoted word for word from the transcript. Nobody has to take the routing on trust. They can read it.
+**8.** And it keeps the receipt: the sentence that justified the assignment, quoted word for word from the transcript. Nobody has to take the assignment on trust. They can read it.
 
-**9.** Step three matters most. Look up what the flight system believes right now: on time, no delay. Then compare. If the voice agrees, nothing happens. If it adds something, it's noted. If it contradicts the record, that's a discrepancy, and that gap is the whole point.
+**9.** Step three matters most. Look up what the flight system believes right now: on time, no delay. Then compare. If the radio call agrees, nothing happens. If it adds something, it's noted. If it contradicts the record, that's a discrepancy, and that gap is the whole point.
 
 **10.** Calls that simply agree with the record get filtered out, on purpose. A tool that flagged every sentence would be ignored by lunchtime.
 
-**11.** Now the temptation: just update the flight. Confidence is ninety-two percent, above the automatic threshold of ninety. Still no. For flights and crew, the list of things the system may change on its own is empty. Confidence alone never earns the right to write the record.
+**11.** Now the temptation: just update the flight. Confidence is ninety-two percent, above the automatic threshold of ninety. Still no. For flights and crew, the list of things the system may change on its own is empty. Confidence alone never earns the right to update the record.
 
-**12.** Think of the voice as a witness, not a judge: it testifies, it doesn't rule. The analogy has a limit. A witness can't open the files. This system can, and it checks the testimony against the record before anyone decides.
+**12.** Think of the radio call as a witness, not a judge: it testifies, it doesn't rule. The analogy has a limit. A witness can't open the files. This system can, and it checks the testimony against the record before anyone decides.
 
-**13.** So the controller doesn't just see "approve a delay?" They see a thirty-five-minute delay with its consequences already drawn: a crew near its duty limit, three passengers whose connection shrinks to ten minutes, a gate conflict. All of it visible before anything is committed.
+**13.** So the controller doesn't just see a button that says "approve a delay?" They see a thirty-five-minute delay with its consequences already drawn: a crew near its duty limit, three passengers whose connection shrinks to ten minutes, a gate conflict. All of it visible before anything is committed.
 
-**14.** The controller reads the evidence and approves. Only then does the record change, stamped with a version number. If anything else touched that flight in the meantime, the write is refused instead of overwriting a newer truth.
+**14.** The controller reads the evidence and approves. Only then does the record change, stamped with a version number. If anything else touched that flight in the meantime, the update is refused instead of overwriting a newer truth.
 
 **15.** In the demo, the system had the delay thirty-five minutes before Flight Ops did. Thirty-five minutes to tell crew, rebook connections and move a gate.
 
-**16.** What's real: the flight data comes from Amadeus's test environment. Ramp, crew and connection details are placeholders. The speech engine is a stand-in with the real interface. Nothing is written back to Amadeus. And savings haven't been measured in live operations, so we won't quote one.
+**16.** What's real: the flight data comes from Amadeus's test environment. Ramp, crew and connection details are placeholders. The speech engine is a stand-in that plugs in the same way as the real one. Nothing is written back to Amadeus. And savings haven't been measured in live operations, so we won't quote one.
 
 **17.** So, back to the two clocks. The answer was never a faster typist. It was letting the system listen, and keeping a person's hand on the dial. The ramp already knows. What else in your airport is being said out loud, and not yet heard?
 
@@ -142,7 +142,7 @@ Palette reminder: tarmac navy, Southwest blue, signal gold, cream paper, alert r
 - **Sound:** Five soft whooshes in a rising order, the largest with a low chord underneath.
 
 ### Scene 8 · 1:43 to 1:57 · The receipt
-- **Visual:** Inside Flight Ops, the transcript sentence is highlighted by a gold **marker stroke** across exactly the words that justified the routing: "hydraulic system two caution, maintenance is heading out, probably a thirty to forty minute delay". A small receipt tag clips to the arc.
+- **Visual:** Inside Flight Ops, the transcript sentence is highlighted by a gold **marker stroke** across exactly the words that justified the assignment: "hydraulic system two caution, maintenance is heading out, probably a thirty to forty minute delay". A small receipt tag clips to the arc.
 - **Action:** The marker drags across the words and the highlighted strip is copied (as a clean ghost) onto the receipt. A magnifier hovers: letter for letter, it matches.
 - **Camera:** Extreme close-up on the highlighted words, then back out.
 - **Transition out:** The receipt tag becomes a small **ticket** and floats up to the Board (scene 9).

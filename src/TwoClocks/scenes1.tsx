@@ -25,6 +25,42 @@ import { NARR, when } from "./timing";
 
 // Scenes 1 to 9 of presentation/educational-video-package.md (section E).
 
+// ---------- hydraulic actuator: pops in as the pilot says "hydraulic" ----------
+const HydraulicActuator: React.FC<{ x: number; y: number; t: number; at: number }> = ({ x, y, t, at }) => {
+  const pop = prog(t, at - 0.15, 0.5);
+  const ext = 0.5 - 0.5 * Math.cos(Math.max(0, t - at) * 3.2); // piston strokes in and out
+  const px = mix(-110, -40, ext); // piston head
+  const flow = (t * 1.4) % 1; // fluid dots moving along the hoses
+  const hose = (d: string) => (
+    <>
+      <path d={d} fill="none" stroke={C.ink} strokeWidth={18} strokeLinecap="round" strokeLinejoin="round" />
+      <path d={d} fill="none" stroke={C.teal} strokeWidth={9} strokeLinecap="round" strokeLinejoin="round" />
+    </>
+  );
+  return (
+    <g transform={`translate(${x} ${y}) scale(${pop})`} opacity={pop}>
+      <rect x={-260} y={-115} width={520} height={215} rx={22} fill={C.panel} stroke={C.ink} strokeWidth={6} />
+      {hose("M-110 -32 V-80 H-175")}
+      {hose("M10 -32 V-80 H75")}
+      <circle cx={mix(-110, -175, flow)} cy={flow < 0.5 ? mix(-32, -80, flow * 2) : -80} r={5} fill={C.cream} />
+      <circle cx={mix(10, 75, flow)} cy={flow < 0.5 ? mix(-32, -80, flow * 2) : -80} r={5} fill={C.cream} />
+      {/* fluid, piston and rod inside the cylinder */}
+      <rect x={-165} y={-32} width={200} height={64} rx={10} fill={C.blue} stroke={C.ink} strokeWidth={6} />
+      <rect x={-155} y={-22} width={px + 155} height={44} rx={4} fill={C.teal} opacity={0.85} />
+      <rect x={px} y={-30} width={12} height={60} fill={C.cream} stroke={C.ink} strokeWidth={4} />
+      <rect x={px + 12} y={-9} width={150} height={18} fill={C.muted} stroke={C.ink} strokeWidth={5} />
+      <rect x={28} y={-32} width={14} height={64} rx={4} fill={C.blueDark} stroke={C.ink} strokeWidth={5} />
+      <circle cx={-180} cy={0} r={13} fill={C.gold} stroke={C.ink} strokeWidth={5} />
+      <circle cx={px + 172} cy={0} r={13} fill={C.gold} stroke={C.ink} strokeWidth={5} />
+      {/* a drop and a caution triangle: the fluid is the trouble */}
+      <path d="M-30 -96 C-14 -76 -10 -64 -30 -56 C-50 -64 -46 -76 -30 -96 Z" fill={C.teal} stroke={C.ink} strokeWidth={5} />
+      <path d="M150 -70 L180 -20 L120 -20 Z" fill={C.gold} stroke={C.ink} strokeWidth={5} strokeLinejoin="round" />
+      <line x1={150} y1={-56} x2={150} y2={-38} stroke={C.ink} strokeWidth={6} strokeLinecap="round" />
+      <circle cx={150} cy={-29} r={3.5} fill={C.ink} />
+    </g>
+  );
+};
+
 // ---------- 1 · The word ----------
 export const S1: React.FC = () => {
   const t = useT();
@@ -33,6 +69,15 @@ export const S1: React.FC = () => {
   const p = prog(t, said - 0.1, 1.6);
   const talk = t > said - 0.4 && t < said + 0.5 ? 1 : 0;
   const ribbon = "M1345 640 C1440 560 1500 420 1600 470 C1700 520 1700 640 1780 600 C1860 560 1880 700 1800 770";
+  // arrow: starts at the bottom of the hydraulic card (screen 860,395), drawn in plane coordinates so it zooms with the plane
+  const arrow = prog(t, said + 0.1, 0.5);
+  const start = { x: 1330 + (860 - 1330) / zoom, y: 650 + (395 - 650) / zoom };
+  const tgt = { x: 770, y: 740 };
+  const R = 125;
+  const dx = tgt.x - start.x, dy = tgt.y - start.y, dist = Math.hypot(dx, dy);
+  const end = { x: tgt.x - (dx / dist) * R, y: tgt.y - (dy / dist) * R };
+  const tip = { x: mix(start.x, end.x, arrow), y: mix(start.y, end.y, arrow) };
+  const ang = (Math.atan2(dy, dx) * 180) / Math.PI;
   return (
     <Art
       overlay={
@@ -41,6 +86,15 @@ export const S1: React.FC = () => {
             <rect x={110} y={84} width={330} height={64} rx={12} fill={C.cream} />
             <Label x={275} y={128} size={30} fill={C.ink}>
               SCHEDULED 15:40
+            </Label>
+          </g>
+          {/* plain-language caption inside the hydraulic card (card centre is 860,290) */}
+          <g opacity={prog(t, said + 0.1, 0.5)}>
+            <Label x={860} y={346} size={24} fill={C.teal}>
+              HYDRAULICS POWER THE
+            </Label>
+            <Label x={860} y={378} size={26} fill={C.cream}>
+              FLAPS · LANDING GEAR · BRAKES
             </Label>
           </g>
         </>
@@ -72,10 +126,21 @@ export const S1: React.FC = () => {
           cockpit={<Bust x={643} y={100} s={0.28} skin={C.skinB} shirt={C.cream} kind="pilot" talk={talk} />}
         />
         <Ribbon d={ribbon} p={p} len={0.55} />
+        {/* arrow from the hydraulic card to the part of the plane it runs through (wing, flaps, landing gear) */}
+        {arrow > 0 && (
+          <g opacity={Math.min(1, arrow * 3)}>
+            <circle cx={tgt.x} cy={tgt.y} r={R * (1 + 0.05 * Math.sin(t * 6))} fill={C.red} fillOpacity={0.18} stroke={C.red} strokeWidth={8} strokeDasharray="24 14" />
+            <line x1={start.x} y1={start.y} x2={tip.x} y2={tip.y} stroke={C.ink} strokeWidth={22} strokeLinecap="round" />
+            <line x1={start.x} y1={start.y} x2={tip.x} y2={tip.y} stroke={C.gold} strokeWidth={11} strokeLinecap="round" />
+            <polygon points="8,0 -36,-26 -36,26" transform={`translate(${tip.x} ${tip.y}) rotate(${ang})`} fill={C.gold} stroke={C.ink} strokeWidth={6} strokeLinejoin="round" />
+          </g>
+        )}
         <Hand x={1600} y={380} size={92} fill={C.teal} rotate={-6} opacity={prog(t, said + 0.5, 0.6)}>
           hydraulic
         </Hand>
       </g>
+      <HydraulicActuator x={860} y={290} t={t} at={said} />
+
     </Art>
   );
 };
