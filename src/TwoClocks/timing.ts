@@ -4,6 +4,7 @@ export const FPS = 24;
 // The music bed (public/music/bed.mp3) is 120 BPM: one beat = 0.5 s. Every scene start and every spoken line
 // lands on a beat, so the cuts and the voice are in time with the track.
 export const BEAT = 0.5;
+export const INTRO_SEC = 7; // "Runway Rebels presents" plays first; everything else starts after it
 export const LEAD = 2 * BEAT; // silence before each line (2 beats)
 const MIN_TAIL = 1.0; // minimum breathing room after each line
 const SCENE_QUANTUM = 2 * BEAT; // scene lengths snap up to a whole 2-beat grid
