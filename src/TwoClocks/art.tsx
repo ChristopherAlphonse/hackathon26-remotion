@@ -394,11 +394,11 @@ export const Tick: React.FC<{ x: number; y: number; s?: number; color?: string; 
   </g>
 );
 
-export const Ground: React.FC<{ y?: number }> = ({ y = 800 }) => (
+export const Ground: React.FC<{ y?: number; marks?: boolean }> = ({ y = 800, marks = true }) => (
   <g>
     <rect x={-20} y={y} width={1960} height={1080 - y + 20} fill={C.panel} />
     <rect x={-20} y={y} width={1960} height={10} fill={C.ink} />
-    {Array.from({ length: 9 }).map((_, i) => (
+    {marks && Array.from({ length: 9 }).map((_, i) => (
       <rect key={i} x={40 + i * 230} y={y + 120} width={120} height={10} rx={5} fill={C.gold} opacity={0.5} />
     ))}
   </g>

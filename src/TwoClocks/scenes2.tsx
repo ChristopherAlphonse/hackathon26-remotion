@@ -557,7 +557,7 @@ export const S17: React.FC = () => {
       {/* the airport: voices rising and fading, unheard */}
       <g opacity={aerial}>
         <rect width={1920} height={1080} fill={C.navy} />
-        <Ground y={800} />
+        <Ground y={800} marks={false} />
         {crew.map((c, i) => {
           const len = 0.45;
           const cyc = (t * 0.22 + i * 0.37) % 1;
