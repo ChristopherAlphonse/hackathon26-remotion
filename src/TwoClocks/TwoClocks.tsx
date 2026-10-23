@@ -2,20 +2,24 @@ import React, { useEffect, useState } from "react";
 import {
   AbsoluteFill,
   Audio,
+  Img,
   continueRender,
   delayRender,
   interpolate,
   Sequence,
+  spring,
   staticFile,
   useCurrentFrame,
 } from "remotion";
 import "./fonts.css";
 import { C } from "./art";
-import { FPS, LEAD, SCENE_SEC, TOTAL_FRAMES } from "./timing";
+import { CREDITS_SEC, FPS, LEAD, SCENE_SEC, TOTAL_FRAMES, VOICE_RATE } from "./timing";
+import { Music } from "./Music";
 import { S1, S2, S3, S4, S5, S6, S7, S8, S9 } from "./scenes1";
 import { S10, S11, S12, S13, S14, S15, S16, S17 } from "./scenes2";
 
-export const TWO_CLOCKS_FRAMES = TOTAL_FRAMES;
+const CREDITS_FRAMES = Math.round(CREDITS_SEC * FPS); // sized so the music's ending lands on the end of the video
+export const TWO_CLOCKS_FRAMES = TOTAL_FRAMES + CREDITS_FRAMES;
 export const TWO_CLOCKS_FPS = FPS;
 
 const SCENES: React.FC[] = [S1, S2, S3, S4, S5, S6, S7, S8, S9, S10, S11, S12, S13, S14, S15, S16, S17];
@@ -54,6 +58,51 @@ const Grain: React.FC = () => (
   </>
 );
 
+const NAMES = ["Abhinav Annabathula", "Christopher Alphonse", "Ikechukwu Anyanwu", "Jasmine Lorenz", "Sam Roberts"];
+
+// Southwest plane glides in from the bottom right, settles, then hovers
+const Plane: React.FC = () => {
+  const f = useCurrentFrame();
+  const p = spring({ frame: f - 1.0 * FPS, fps: FPS, config: { damping: 20, stiffness: 55, mass: 1.2 } });
+  const hover = f > 2.5 * FPS ? Math.sin((f - 2.5 * FPS) / 30) * 6 : 0;
+  const o = interpolate(f, [1.0 * FPS, 1.6 * FPS], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
+  return (
+    <Img
+      src={staticFile("plane.png")}
+      style={{
+        position: "absolute",
+        right: 60,
+        bottom: 70,
+        width: 640,
+        opacity: o,
+        transform: `translate(${(1 - p) * 900}px, ${(1 - p) * 140 + hover}px) rotate(${(1 - p) * -8}deg)`,
+        filter: "drop-shadow(0 30px 40px rgba(0,0,0,0.55))",
+      }}
+    />
+  );
+};
+
+const Credits: React.FC = () => {
+  const f = useCurrentFrame();
+  const fade = (from: number, dur = 0.8) =>
+    interpolate(f, [from * FPS, (from + dur) * FPS], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
+  const out = interpolate(f, [CREDITS_FRAMES - 0.8 * FPS, CREDITS_FRAMES], [1, 0], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
+  return (
+    <AbsoluteFill style={{ alignItems: "center", justifyContent: "center", opacity: out, color: C.cream }}>
+      <div style={{ fontFamily: "Caveat, cursive", fontWeight: 700, fontSize: 96, color: C.gold, opacity: fade(0.3) }}>Swoice</div>
+      <div style={{ fontFamily: "Inter, sans-serif", fontWeight: 500, fontSize: 28, letterSpacing: 8, paddingLeft: 8, textTransform: "uppercase", color: C.muted, margin: "8px 0 48px", opacity: fade(0.6) }}>
+        Built by
+      </div>
+      <Plane />
+      {NAMES.map((n, i) => (
+        <div key={n} style={{ fontFamily: "Inter, sans-serif", fontWeight: 900, fontSize: 60, lineHeight: 1.4, opacity: fade(1.1 + i * 0.45) }}>
+          {n}
+        </div>
+      ))}
+    </AbsoluteFill>
+  );
+};
+
 export const TwoClocks: React.FC = () => {
   const [handle] = useState(() => delayRender("fonts"));
   useEffect(() => {
@@ -75,10 +124,14 @@ export const TwoClocks: React.FC = () => {
             <Scene />
           </FadeShell>
           <Sequence from={Math.round(LEAD * FPS)}>
-            <Audio src={staticFile(`twoclocks/n${i + 1}.wav`)} />
+            <Audio src={staticFile(`twoclocks/n${i + 1}.wav`)} playbackRate={VOICE_RATE} />
           </Sequence>
         </Sequence>
       ))}
+      <Music />
+      <Sequence from={TOTAL_FRAMES} durationInFrames={CREDITS_FRAMES}>
+        <Credits />
+      </Sequence>
       <Grain />
     </AbsoluteFill>
   );

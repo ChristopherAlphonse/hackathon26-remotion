@@ -1,9 +1,17 @@
 // Generated from the narration audio (public/twoclocks/n*.wav) and the script in
 // presentation/educational-video-package.md. Durations are the real lengths of the ElevenLabs TTS clips (voice: Matilda).
 export const FPS = 24;
-export const LEAD = 0.7; // silence before each line
-export const TAIL = 1.1; // breathing room after each line
-export const NARR: number[] = [8.41, 9.66, 11.56, 8.78, 13.14, 12.12, 21.55, 10.91, 18.81, 8.41, 17.93, 15.74, 17.88, 13.75, 9.43, 19.18, 15.05];
+// The music bed (public/music/bed.mp3) is 120 BPM: one beat = 0.5 s. Every scene start and every spoken line
+// lands on a beat, so the cuts and the voice are in time with the track.
+export const BEAT = 0.5;
+export const LEAD = 2 * BEAT; // silence before each line (2 beats)
+const MIN_TAIL = 1.0; // minimum breathing room after each line
+const SCENE_QUANTUM = 2 * BEAT; // scene lengths snap up to a whole 2-beat grid
+// Raw clip lengths (seconds) of public/twoclocks/n*.wav, regenerated with scripts/generate-narration.mts
+// (ElevenLabs eleven_v3, voice Matilda, "[upbeat]"). The clips are played 10% faster to match the music's tempo.
+export const NARR_RAW: number[] = [8.67, 8.91, 11.39, 8.52, 13.17, 11.08, 21.79, 9.8, 18.36, 8.05, 18.6, 14.92, 16.93, 13.17, 9.17, 18.36, 15.07];
+export const VOICE_RATE = 1.1;
+export const NARR: number[] = NARR_RAW.map((n) => Math.round((n / VOICE_RATE) * 100) / 100);
 export const TEXT: string[] = [
  "A flight is set to leave Dallas Love Field at 3:40 this afternoon. Then the pilot keys the radio and says one word: hydraulic.",
  "The ramp hears it. Maintenance starts walking out. But the airline's system of record, the one everybody trusts, still says: on time.",
@@ -23,10 +31,35 @@ export const TEXT: string[] = [
  "What's real: the flight data comes from Amadeus's test environment. Ramp, crew and connection details are placeholders. The speech engine is a stand-in with the real interface. Nothing is written back to Amadeus. And savings haven't been measured in live operations, so we won't quote one.",
  "So, back to the two clocks. The answer was never a faster typist. It was letting the system listen, and keeping a person's hand on the dial. The ramp already knows. What else in your airport is being said out loud, and not yet heard?"
 ];
-export const SCENE_SEC = NARR.map((n) => n + LEAD + TAIL);
+export const SCENE_SEC = NARR.map((n) => Math.ceil((LEAD + n + MIN_TAIL) / SCENE_QUANTUM - 1e-9) * SCENE_QUANTUM);
 export const SCENE_START = SCENE_SEC.map((_, i) => SCENE_SEC.slice(0, i).reduce((a, b) => a + b, 0));
 export const TOTAL_SEC = SCENE_SEC.reduce((a, b) => a + b, 0);
 export const TOTAL_FRAMES = Math.round(TOTAL_SEC * FPS);
+
+// ---- Music plan (all times in seconds of the source track unless noted) ----
+// Source structure (measured): 0-4 quiet intro, 4-35 groove, 35-36 breakdown, 36-~76.5 groove, ~76.5-79.5 ending decay.
+// We play the intro + first groove once (0-36), loop the 36-52 groove, and finish with the ending (ES-79.54),
+// so the track's own ending lands on the end of the video.
+export const MUSIC_LEN = 79.5428;
+export const MUSIC_INTRO = 4; // the groove "drops" at 4.0 s
+export const MUSIC_START = SCENE_START[1] - MUSIC_INTRO; // so the drop hits exactly on the cut into scene 2
+export const MUSIC_HEAD = 36; // played once from 0
+export const MUSIC_LOOP_START = 36;
+export const MUSIC_LOOP_LEN = 16; // 8 bars
+const MIN_CREDITS = 8;
+const plan = (() => {
+  let best = { loops: 0, ending: 72, credits: Infinity };
+  for (let k = 0; k < 40; k++) {
+    for (let es = MUSIC_LOOP_START + MUSIC_LOOP_LEN; es <= 72; es += 4) {
+      const credits = MUSIC_START + MUSIC_HEAD + k * MUSIC_LOOP_LEN + (MUSIC_LEN - es) - TOTAL_SEC;
+      if (credits >= MIN_CREDITS && credits < best.credits) best = { loops: k, ending: es, credits };
+    }
+  }
+  return best;
+})();
+export const MUSIC_LOOPS = plan.loops;
+export const MUSIC_ENDING = plan.ending; // start of the ending section in the source track
+export const CREDITS_SEC = plan.credits;
 
 /** Seconds into scene `i` (0-based) at which `phrase` is spoken (estimated from its position in the line). */
 export const when = (i: number, phrase: string): number => {

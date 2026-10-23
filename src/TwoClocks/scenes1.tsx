@@ -104,7 +104,7 @@ export const S2: React.FC = () => {
   const ripple = lin(t, 3.0, 1.6);
   const walk = Math.max(0, t - when(1, "Maintenance"));
   const wx = mix(700, 1000, lin(t, when(1, "Maintenance"), 3.2));
-  const ribbon = "M-40 560 C 300 470 520 660 760 560 S 1000 500 1090 540";
+  const ribbon = "M-40 470 C 200 380 520 400 700 450 S 1000 480 1090 540";
   return (
     <Art>
       <rect width={1920} height={1080} fill="url(#dusk)" />

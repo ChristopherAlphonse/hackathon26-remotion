@@ -119,4 +119,3 @@ Thank you. Questions?"
 - **Props:** a handheld radio (a phone works), a laptop on a stool, an index card, a SWOICE sign.
 - **If you run long:** cut the second "Nobody has typed that in yet" exchange in Part 1, then drop section 5.
 - **If you have a live demo:** replace sections 3 and 4 with the live demo and keep sections 5 to 8.
-- **Remotion link:** the `Pitch` composition (`src/Pitch.tsx`) matches this script scene for scene. Render it with `npx remotion render Pitch out/pitch.mp4 --port=3123` (the port avoids a clash with Studio on 3000).
