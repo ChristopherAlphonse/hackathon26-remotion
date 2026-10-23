@@ -36,8 +36,10 @@ export const TEXT: string[] = [
 // ---- Schedule ----
 // Act 1 = scenes 1 to 13 (before the demo). Then the demo video plays on its own, and act 2 = scenes 14 to 16 (value, rollout, conclusion).
 export const ACT1 = 13; // number of narrated scenes before the demo
-export const DEMO_SRC = "demo/video1.mp4"; // 24 fps copy of video1.mov (see README)
-export const DEMO_FRAMES = 3136; // the clip is 133.71 s; we stop at 130.67 s because the macOS screenshot toolbar appears in the recording after ~131 s
+export const DEMO_SRC = "music/FINAL.mp4"; // 3840x2160, 29.97 fps, 76.41 s; its own audio is muted
+export const DEMO_AUDIO = "music/swoice-demo-narration 1.wav"; // 82.61 s; this is the demo's only sound
+export const DEMO_VIDEO_FRAMES = 1812; // 75.5 s of the 76.41 s video (the macOS screenshot toolbar fades in after ~75.7 s); after this the last frame is held while the narration finishes
+export const DEMO_FRAMES = 1995; // 82.61 s of narration (1983 frames) plus X_OUT, so the fade-out starts after the last word
 export const DEMO_SEC = DEMO_FRAMES / FPS;
 export const X_IN = 1; // crossfade from the last scene into the demo (s)
 export const X_OUT = 0.5; // crossfade from the demo into the first scene of act 2 (s)

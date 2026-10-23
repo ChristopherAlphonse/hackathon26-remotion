@@ -5,6 +5,7 @@ import {
   continueRender,
   delayRender,
   Easing,
+  Freeze,
   Img,
   interpolate,
   OffthreadVideo,
@@ -18,8 +19,10 @@ import { C } from "./art";
 import {
   ACT1,
   CREDITS_SEC,
+  DEMO_AUDIO,
   DEMO_FRAMES,
   DEMO_SRC,
+  DEMO_VIDEO_FRAMES,
   DEMO_START,
   FPS,
   INTRO_SEC,
@@ -83,7 +86,7 @@ const FadeShell: React.FC<{ len: number; fadeIn?: number; fadeOut?: number; chil
   return <AbsoluteFill style={{ opacity: o }}>{children}</AbsoluteFill>;
 };
 
-/** The screen recording (video1): it grows out of the last scene, plays with its own sound, and melts into the first closing scene. */
+/** The screen recording (video1): it grows out of the last scene, plays muted with the narration wav as its only sound, and melts into the first closing scene. */
 const Demo: React.FC = () => {
   const f = useCurrentFrame();
   const inF = X_IN * FPS;
@@ -97,7 +100,7 @@ const Demo: React.FC = () => {
     <AbsoluteFill style={{ opacity: o, alignItems: "center", justifyContent: "center" }}>
       <div
         style={{
-          width: 1888,
+          width: 1920,
           height: 1080,
           transform: `scale(${scale})`,
           borderRadius: radius,
@@ -105,12 +108,12 @@ const Demo: React.FC = () => {
           boxShadow: grow < 1 ? `0 0 0 ${6 * (1 - grow)}px ${C.gold}` : undefined,
         }}
       >
-        <OffthreadVideo
-          src={staticFile(DEMO_SRC)}
-          style={{ width: 1888, height: 1080 }}
-          volume={(fr) => interpolate(fr, [0, inF, DEMO_FRAMES - outF, DEMO_FRAMES], [0, 1, 1, 0], clamp)}
-        />
+        {/* the video is shorter than the narration, so its last frame is held until the voice finishes */}
+        <Freeze frame={Math.min(f, DEMO_VIDEO_FRAMES - 1)}>
+          <OffthreadVideo src={staticFile(DEMO_SRC)} style={{ width: 1920, height: 1080 }} muted />
+        </Freeze>
       </div>
+      <Audio src={staticFile(DEMO_AUDIO)} volume={(fr) => interpolate(fr, [0, 4], [0, 1], clamp)} />
     </AbsoluteFill>
   );
 };
