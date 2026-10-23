@@ -172,6 +172,19 @@ export const S12: React.FC = () => {
   const slip = prog(t, when(11, "can't open"), 0.8);
   const sysOpen = prog(t, when(11, "This system can"), 0.9);
   const merge = prog(t, when(11, "checks the testimony"), 1.2);
+  // the witness's arm, in the figure's own coordinates: upper arm 100 long, forearm 92 long
+  const rad = (d: number) => (d * Math.PI) / 180;
+  const a1 = rad(mix(100, 14, right) + slip * 18); // upper arm: hangs, rises, sags
+  const a2 = rad(mix(100, 4, right) + slip * 72); // forearm: hangs, reaches, drops
+  const arm = (() => {
+    const sx = 34;
+    const sy = 66;
+    const ex = sx + 100 * Math.cos(a1);
+    const ey = sy + 100 * Math.sin(a1);
+    const wx = ex + 92 * Math.cos(a2);
+    const wy = ey + 92 * Math.sin(a2);
+    return { sx, sy, ex, ey, wx, wy, hx: wx + 16 * Math.cos(a2), hy: wy + 16 * Math.sin(a2) };
+  })();
   return (
     <Art
       overlay={
@@ -194,12 +207,17 @@ export const S12: React.FC = () => {
       </g>
       {/* the Voice, as a witness */}
       <g transform={`translate(560 ${450 + wave * 4})`}>
+        {/* the arm: shoulder -> elbow -> wrist -> hand. It rises to reach, then the forearm drops: it can't open the files. Drawn first so the shoulder tucks behind the body. */}
+        <g opacity={right}>
+          <path d={`M${arm.sx} ${arm.sy} L${arm.ex} ${arm.ey} L${arm.wx} ${arm.wy}`} fill="none" stroke={C.ink} strokeWidth={40} strokeLinecap="round" strokeLinejoin="round" />
+          <path d={`M${arm.sx} ${arm.sy} L${arm.ex} ${arm.ey} L${arm.wx} ${arm.wy}`} fill="none" stroke={C.teal} strokeWidth={24} strokeLinecap="round" strokeLinejoin="round" />
+          <circle cx={arm.hx} cy={arm.hy} r={22} fill={C.teal} stroke={C.ink} strokeWidth={8} />
+        </g>
         <path d="M-70 110 C-70 0 70 0 70 110" fill={C.teal} stroke={C.ink} strokeWidth={8} />
         <circle cx={0} cy={-34} r={54} fill={C.teal} stroke={C.ink} strokeWidth={8} />
         <circle cx={-18} cy={-42} r={6} fill={C.ink} />
         <circle cx={18} cy={-42} r={6} fill={C.ink} />
         <ellipse cx={0} cy={-14} rx={14} ry={Math.abs(wave) * 8 + 4} fill={C.ink} />
-        <path d={`M62 40 C140 ${10 + slip * 40} 220 ${20 + slip * 30} ${300 - slip * 10} ${60 + slip * 70}`} fill="none" stroke={C.teal} strokeWidth={14} strokeLinecap="round" opacity={right} />
       </g>
       {/* filing cabinet */}
       <g opacity={right}>
@@ -276,9 +294,6 @@ export const S13: React.FC = () => {
           </Label>
           <Label x={960} y={1010} size={30} fill={C.cream} opacity={gate}>
             GATE CONFLICT
-          </Label>
-          <Label x={1860} y={1050} size={20} fill={C.muted} anchor="end">
-            ILLUSTRATIVE PLACEHOLDER DATA
           </Label>
         </>
       }

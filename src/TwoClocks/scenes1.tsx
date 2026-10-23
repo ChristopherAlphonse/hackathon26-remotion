@@ -379,8 +379,8 @@ export const S7: React.FC = () => {
             .filter((c) => c.score)
             .map((c) => (
               <g key={c.score} opacity={prog(t, c.at, 0.5)}>
-                <rect x={c.x - 56} y={196} width={112} height={54} rx={12} fill={C.gold} />
-                <Label x={c.x} y={236} size={34} fill={C.ink} weight={900}>
+                <rect x={c.x - 56} y={650} width={112} height={54} rx={12} fill={C.gold} />
+                <Label x={c.x} y={690} size={34} fill={C.ink} weight={900}>
                   {c.score}
                 </Label>
               </g>
