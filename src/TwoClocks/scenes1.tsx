@@ -364,10 +364,12 @@ export const S7: React.FC = () => {
   ];
   const shoot = when(6, "Hydraulic");
   const zoom = mix(1, 1.25, prog(t, NARR[6] - 3.2, 2.4));
+  const zoomT = `translate(700 520) scale(${zoom}) translate(-700 -520)`;
   return (
     <Art
       overlay={
-        <>
+        // the overlay sits outside the zoomed drawing, so it needs the same zoom or the names and scores drift off their cards
+        <g transform={zoomT}>
           {cards.map((c) => (
             <Label key={c.name} x={c.x} y={760} size={24} fill={C.cream} opacity={prog(t, 0.6, 0.7)}>
               {c.name}
@@ -383,10 +385,10 @@ export const S7: React.FC = () => {
                 </Label>
               </g>
             ))}
-        </>
+        </g>
       }
     >
-      <g transform={`translate(700 520) scale(${zoom}) translate(-700 -520)`}>
+      <g transform={zoomT}>
         <g opacity={prog(t, 0.3, 0.7)}>
           <Strip x={250} y={560} w={380} h={120} lines={3} seed={5} />
         </g>
