@@ -10,7 +10,7 @@ const MIN_TAIL = 1.0; // minimum breathing room after each line
 const SCENE_QUANTUM = 2 * BEAT; // scene lengths snap up to a whole 2-beat grid
 // Raw clip lengths (seconds) of public/twoclocks/n*.wav, regenerated with scripts/generate-narration.mts
 // (ElevenLabs eleven_v4, voice "christopher alphonse" (cloned), cut from one full take with forced alignment). The clips are played 10% faster to match the music's tempo.
-export const NARR_RAW: number[] = [8.18, 8.16, 10.66, 7.62, 12.22, 10.24, 18.50, 9.06, 16.64, 7.02, 16.04, 13.54, 16.86, 12.64, 8.82, 17.06, 14.94];
+export const NARR_RAW: number[] = [8.18, 8.17, 10.60, 7.63, 12.23, 10.39, 19.08, 9.06, 16.94, 7.02, 16.04, 13.54, 16.55, 12.64, 8.82, 17.06, 14.93];
 export const VOICE_RATE = 1.1;
 export const NARR: number[] = NARR_RAW.map((n) => Math.round((n / VOICE_RATE) * 100) / 100);
 export const TEXT: string[] = [

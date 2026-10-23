@@ -230,7 +230,7 @@ export const TwoClocks: React.FC = () => {
     <AbsoluteFill
       style={{
         backgroundColor: C.navy,
-        translate: "-1px 0px",
+        translate: "-2px 0px"
       }}
     >
       <AbsoluteFill
