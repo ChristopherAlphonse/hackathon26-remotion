@@ -78,7 +78,7 @@ export const ACT1_SEC = ACT1_BASE + MUSIC1.credits;
 export const DEMO_START = ACT1_SEC - X_IN;
 export const ACT2_START = DEMO_START + DEMO_SEC - X_OUT;
 // act 2: the groove enters on the cut from the demo, and the track's ending lands on the last frame of the credits
-const MIN_CREDITS = 8; // seconds of end credits after the conclusion
+const MIN_CREDITS = 5; // seconds of end credits after the conclusion
 export const MUSIC2 = planMusic(ACT2_START, MUSIC_INTRO, ACT2_START + ACT2_BASE + MIN_CREDITS);
 export const CREDITS_SEC = MIN_CREDITS + MUSIC2.credits;
 export const TOTAL_SEC = ACT2_START + ACT2_BASE; // the last narrated scene ends here; the credits follow
