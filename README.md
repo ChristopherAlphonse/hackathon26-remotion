@@ -6,9 +6,9 @@ A narrated, animated explainer built with [Remotion](https://www.remotion.dev/).
     <img src="cover.png">
 </p>
 
-- 1920x1080 at 24 fps, roughly 4 minutes 20 seconds: a 7 s "Runway Rebels presents" intro, 17 narrated scenes, then credits.
+- 1920x1080 at 24 fps, about 4 minutes 25 seconds (264.5 s): a 7 s "Runway Rebels presents" intro, 17 narrated scenes (246 s), then about 11.5 s of credits.
 - One composition, `TwoClocks` (`src/Root.tsx`).
-- Narration is generated with ElevenLabs. The music bed and intro sound effect are in the repo.
+- Narration is generated with ElevenLabs (voice: Matilda). The music bed and intro sound effect are in the repo, so you only need an ElevenLabs key if you change the narration.
 
 ## Setup
 
@@ -48,22 +48,44 @@ npm run upgrade   # upgrade Remotion
 
 ## Timing
 
-Everything is driven by `src/TwoClocks/timing.ts`. Scene starts and narration land on the music's beat grid (120 BPM, one beat is 0.5 s), and each scene length is derived from its narration clip length. If you change the narration, update `NARR_RAW` (the raw clip lengths in seconds); scene lengths, cuts and the music loop are computed from it.
+Everything is driven by `src/TwoClocks/timing.ts`. Scene starts and narration land on the music's beat grid (120 BPM, one beat is 0.5 s), and each scene length is derived from its narration clip length. If you change the narration, update `NARR_RAW` (the raw clip lengths in seconds); scene lengths, cuts, the music loop and the credits length are computed from it.
+
+- Each narration line starts 1 s (2 beats) into its scene and gets at least 1 s of silence after it. Scene lengths round up to whole seconds.
+- Clips play 10% faster than they were recorded (`VOICE_RATE = 1.1`) to match the music's tempo. `NARR_RAW` holds the recorded lengths, before the speed-up.
+- Credits are sized so the music's own ending lands on the last frame, with at least 8 s of credits.
 
 ## Regenerate the narration
 
 Needs an ElevenLabs key and macOS (`afconvert` is used to make the WAV files).
 
 1. Put `ELEVENLABS_API_KEY=...` in `.env.local` (see `.env.example`). `.env.local` is gitignored.
-2. Run:
+2. Run the command that matches the current narration (model `eleven_v3`, tag `[upbeat]`):
 
 ```console
-npx tsx --env-file=.env.local scripts/generate-narration.mts
+npx tsx --env-file=.env.local scripts/generate-narration.mts --model eleven_v3 --tag "[upbeat]"
 ```
 
-Useful options: `--scenes 1,2,3` to redo only some scenes, `--out DIR`, `--model ID`, `--stability N`, `--style N`, `--speed N`, `--tag "[upbeat]"`. It reads the lines from `TEXT` in `timing.ts` and writes `n1.wav` to `n17.wav` (mono, 44.1 kHz, 16-bit) into `public/twoclocks` by default.
+The script's own defaults differ: with no flags it uses `eleven_multilingual_v2` and no tag, so the result will not match the shipped narration.
 
-After regenerating, measure the new clip lengths and update `NARR_RAW` in `timing.ts`.
+Options:
+
+| Option | Default | Notes |
+|---|---|---|
+| `--scenes 1,2,3` | all | Redo only these scenes |
+| `--out DIR` | `public/twoclocks` | Output folder |
+| `--model ID` | `eleven_multilingual_v2` | `eleven_v3` skips previous/next text stitching |
+| `--tag "[upbeat]"` | none | Audio tag, `eleven_v3` and `eleven_v4` only. Older models read it aloud |
+| `--stability N` | `0.35` | Voice stability |
+| `--style N` | `0.5` | Not supported on `eleven_v4` |
+| `--speed N` | `1.1` | Not supported on `eleven_v4` |
+
+The script reads the lines from `TEXT` in `timing.ts` and writes `n1.wav` to `n17.wav` (mono, 44.1 kHz, 16-bit).
+
+After regenerating, measure each new clip and update `NARR_RAW` in `timing.ts`:
+
+```console
+afinfo public/twoclocks/n1.wav | grep "estimated duration"
+```
 
 ## Regenerate the intro sound effect
 
